@@ -3,6 +3,11 @@ import { useNavigate } from "react-router-dom";
 import Loading from '../components/loading.jsx';
 import { MyContext } from '../contexts/MyContextProvider.jsx';
 import SideDrawer from '../components/sideDrawer.jsx';
+import NavBar from '../components/navbar.jsx';
+import Timeline from '../components/timeline.jsx';
+import Status from '../components/status.jsx';
+import Stats from '../components/stats.jsx';
+import Waffle from '../components/waffle.jsx';
 
 const userData = {
   user_id: '123456789',
@@ -41,60 +46,50 @@ export default function Home() {
   const { user_id, updateUser_id } = useContext(MyContext);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
+  const [date, setDate] = useState(null);
 
   useEffect(() => {
     // Get data from api
+    const date = new Date();
+    const options = { day: '2-digit', month: 'long', year: 'numeric' };
+    const formattedDate = date.toLocaleDateString('en-UK', options);
+    setDate(formattedDate);
   }, []);
-
-  function clickUsername() {
-    setTimeout(() => {
-      setOpenSideDrawer(true);
-    },0)
-    // Open side drawer
-    // reset button
-    // logout button
-  }
-
-  function clickHome() {
-    // do nothing 
-  }
-
-  function clickSchedule() {
-    // Change ui 
-  }
-
-  function clickLeave() {
-    // Change ui
-  }
 
   return isLoading ? (<Loading />) : (
     <div className="flex flex-col h-screen">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
-      <nav className='flex content-center w-screen h-20 bg-neutral-800'>
-        <button className='p-5 mx-40 text-xl hover:scale-105 focus:text-orange-400'
-          onClick={clickUsername}>
-          {userData.name}
-        </button>
-        <button className='p-5 text-xl hover:scale-105 focus:underline focus:text-orange-400'
-          onClick={clickHome}>
-          Home
-        </button>
-        <button className='p-5 text-xl hover:scale-105 focus:underline focus:text-orange-400'
-          onClick={clickSchedule}>
-          Schedule
-        </button>
-        <button className='p-5 text-xl hover:scale-105 focus:underline focus:text-orange-400'
-          onClick={clickLeave}>
-          Leave
-        </button>
-      </nav>
-      <section className='flex-1' >
-        <div className='flex flex-col max-2xl:'>
-          
+      <NavBar userData={userData} openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
+      <section className='flex flex-col items-center justify-center flex-1 w-screen' >
+        <div className='flex flex-row justify-center w-full h-full p-5 lg:p-10 lg:w-5/6 max-w-7xl min-w-[16rem]'>
+          <div className='flex flex-col hidden w-1/2 md:w-1/3 sm:block'>
+            <div className='flex items-center justify-center h-16'>
+              <h1 className='text-xl'>{date}</h1>
+            </div>
+            <div className='flex items-center justify-center mx-4 h-5/6'>
+              <Timeline/>
+            </div>
+          </div>
+          <div className='w-full sm:w-1/2 md:w-2/3 min-w-[16rem]'>
+            <div className='flex items-center justify-center h-16 pr-6 ml-6'>
+              <h1 className='text-xl'>Welcome</h1>
+            </div>
+            <div className='flex flex-col flex-wrap flex-1 lg:flex-row '>
+              <div className='flex-1 m-4 mt-0 border border-gray-400 rounded-xl'>
+                <Status/>
+              </div>
+              <div className='flex-1 m-4 mt-0 border border-gray-400 rounded-xl'>
+                <Stats/>
+              </div>
+            </div>
+            <div className='hidden m-4 mb-0 border border-gray-400 rounded-xl h-1/3 lg:block'>
+              <Waffle/>
+            </div>
+          </div>
         </div>
       </section>
     </div>
   )
 }
+
