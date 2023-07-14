@@ -7,12 +7,13 @@ import NavBar from '../components/navbar.jsx';
 import Timeline from '../components/timeline.jsx';
 import Status from '../components/status.jsx';
 import Stats from '../components/stats.jsx';
-import Waffle from '../components/waffle.jsx';
+import Calendar from '../components/calander.jsx';
 
 const userData = {
   user_id: '123456789',
   name: 'Cakemix',
   email: 'email@gmail.com',
+  startedDate: '2023-07-01',
   worked7: 38,
   worked7goal: 45,
   streak: 68,
@@ -23,8 +24,8 @@ const userData = {
 
 const days = [
   {
-    day_id: '20230712',
-    date: '20230712',
+    day_id: '2023-07-12',
+    date: '2023-07-12',
     status: 'current',
     worked: 0,
     events: [
@@ -84,7 +85,7 @@ export default function Home() {
               </div>
             </div>
             <div className='hidden m-4 mb-0 border border-gray-400 rounded-xl h-1/3 lg:block'>
-              <Waffle/>
+              <Calendar days={days}/>
             </div>
           </div>
         </div>
