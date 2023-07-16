@@ -100,12 +100,10 @@ function populateEmptyDays(data) {
     const strDate = date.toISOString().split('T')[0];
     let day = { date: strDate, count: 0 };
     if (index < data.length && data[index].date === strDate) {
-      console.log('found: ', strDate);
       day.count = data[index].count;
       index++;
     }
     newData.push(day);
   }
-  console.log(newData.length);
   return newData;
 }

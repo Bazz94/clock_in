@@ -62,7 +62,7 @@ export default function Home() {
     <div className="flex flex-col h-screen">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
       <NavBar userData={userData} openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
-      <section className='flex flex-col items-center justify-center flex-1 w-screen' >
+      <section className='flex flex-col items-center justify-center h-[90%] w-screen' >
         <div className='flex flex-row justify-center w-full h-full p-5 lg:p-10 lg:w-5/6 max-w-7xl min-w-[16rem]'>
           <div className='flex flex-col hidden w-1/2 md:w-1/3 sm:block'>
             <div className='flex items-center justify-center h-16'>
