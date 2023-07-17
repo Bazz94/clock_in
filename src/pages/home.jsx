@@ -68,7 +68,7 @@ export default function Home() {
             <div className='flex items-center justify-center h-16'>
               <h1 className='text-xl'>{date}</h1>
             </div>
-            <div className='flex items-center justify-center mx-4 h-5/6'>
+            <div className='flex items-center justify-center mx-4 border shadow-md border-neutral-800 h-5/6 rounded-xl'>
               <Timeline/>
             </div>
           </div>
@@ -77,14 +77,14 @@ export default function Home() {
               <h1 className='text-xl'>Welcome</h1>
             </div>
             <div className='flex flex-col flex-wrap flex-1 lg:flex-row '>
-              <div className='flex-1 m-4 mt-0 border border-gray-400 rounded-xl'>
+              <div className='flex-1 m-4 mt-0 border shadow-md border-neutral-800 rounded-xl'>
                 <Status/>
               </div>
-              <div className='flex-1 m-4 mt-0 border border-gray-400 rounded-xl'>
+              <div className='flex-1 m-4 mt-0 border shadow-md border-neutral-800 rounded-xl'>
                 <Stats/>
               </div>
             </div>
-            <div className='hidden m-4 mb-0 border border-gray-400 rounded-xl h-1/3 lg:block'>
+            <div className='hidden m-4 mb-0 border shadow-md border-neutral-800 rounded-xl h-1/3 lg:block'>
               <Calendar days={days}/>
             </div>
           </div>
