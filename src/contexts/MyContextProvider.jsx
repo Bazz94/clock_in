@@ -30,7 +30,8 @@ export { MyContext, MyContextProvider };
 
 
 function getTime() {
+  const options = ['en-Gb', { hour: '2-digit', minute: '2-digit', hour12: false }]
   const date = new Date();
-  const formattedTime = date.toLocaleTimeString('en-Gb', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const formattedTime = date.toLocaleTimeString(...options);
   return formattedTime;
 }
