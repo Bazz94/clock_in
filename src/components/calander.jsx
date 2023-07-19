@@ -15,39 +15,42 @@ import CalendarHeatmap from 'react-calendar-heatmap';
   10 : misused (never clocked-out) : yellow
 */
 
-// should be sorted by date
-const data = [
-  { date: '2023-07-14', count: 1 },
-  { date: '2023-07-13', count: 2 },
-  { date: '2023-07-12', count: 3 },
-  // ...and so on
-]
+const typeToCount = {
+  current: 1,
+  late: 2,
+  absent: 3,
+  perfect: 4,
+  halfDay: 6,
+  sick: 7,
+  leave: 8,
+  offDay: 9,
+  misused: 10,
+}
 
-function Calendar() {
+function Calendar({days}) {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [tooltipText, setTooltipText] = useState('');
-  const [days, setDays] = useState([]);
+  const [values, setValues] = useState([]);
   
   useEffect(() => {
     const {from , to} = getFromAndToDates();
     setFromDate(from);
     setToDate(to);
-    setDays(populateEmptyDays(data));
-  }, [])
+    setValues(populateEmptyDays(days));
+  }, [days])
 
   const handleMouseMove = (e) => {
     setTooltipPosition({ y: e.pageY, x: e.pageX });
   };
-
   return (
     <div className="flex w-full h-full px-4" onMouseMove={handleMouseMove}>
       <CalendarHeatmap
         startDate={fromDate}
         endDate={toDate}
-        values={days}
+        values={values}
         showWeekdayLabels={true}
         showOutOfRangeDays={true}
         onMouseOver={(event, value) => {
@@ -55,7 +58,7 @@ function Calendar() {
             return false;
           }
           setShowTooltip(true);
-          setTooltipText({date: value.date, count: value.count});
+          setTooltipText({ date: value.date, count: Object.keys(typeToCount).find((key) => typeToCount[key] === value.count) });
         }}
         onMouseLeave={(event, value) => {
           setShowTooltip(false)
@@ -99,11 +102,12 @@ function populateEmptyDays(data) {
     date.setDate(date.getDate() - 1);
     const strDate = date.toISOString().split('T')[0];
     let day = { date: strDate, count: 0 };
-    if (index < data.length && data[index].date === strDate) {
-      day.count = data[index].count;
+    if (index < data.length && data[index].date.toISOString().split('T')[0] === strDate) {
+      day.count = typeToCount[data[index].status];
       index++;
     }
     newData.push(day);
   }
   return newData;
 }
+

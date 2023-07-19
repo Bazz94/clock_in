@@ -3,42 +3,7 @@ import { MyContext } from '../contexts/MyContextProvider.jsx';
 import { Stage, Layer, Line, Text, Circle, Group } from 'react-konva';
 
 
-function makeDate(hours, mins = 0) {
-  const date = new Date();
-  date.setHours(hours);
-  date.setMinutes(mins);
-  return date;
-}
-
-const day = {
-  status: null,
-  date: makeDate(0),
-  workStarts: {
-    date: makeDate(9)
-    //dates: null
-  },
-  workEnds: {
-    date: makeDate(17)
-    //dates: null
-  },
-  clockedIn: {
-    dates: makeDate(9) // turn into arrays, so users can clockIn multiple times
-    //dates: null
-  },
-  clockedOut: {
-    dates: makeDate(18) // turn into arrays, so users can clockOut multiple times
-    //dates: null
-  },
-  startedBreak: {
-    dates: null
-  },
-  endedBreak: {
-    dates: null
-  },
-}
-
-
-function Timeline() {
+const Timeline = ({day}) => {
   const { time } = useContext(MyContext);
   const parentRef = useRef(null);
   const [dimensions, setDimensions] = useState({w: 0, h: 0});
@@ -57,7 +22,7 @@ function Timeline() {
         {dimensions.h !== 0 && <Layer>
           <EmptyTimeLine dimensions={dimensions}/>
           <Lines day={day} dimensions={dimensions} />
-          <CurrentTimeDot dimensions={dimensions} time={time} />
+          <CurrentTimeDot day={day} dimensions={dimensions} time={time} />
         </Layer>}
       </Stage>
     </div>
@@ -94,14 +59,14 @@ const EmptyTimeLine = ({dimensions}) => {
   )
 }
 
-function CurrentTimeDot({dimensions, time}) {
+function CurrentTimeDot({day, dimensions, time}) {
   const xMid = dimensions.w / 2;
   const date = new Date();
   const currentTimePoint = { x: xMid, y: timeToYValue(date, dimensions.h) };
   return (
     <Group>
       <Circle x={currentTimePoint.x} y={currentTimePoint.y} radius={6} fill="#eee" />
-      <Text x={currentTimePoint.x - 70} y={currentTimePoint.y-6} text={time} fontSize={15} fill='#eee' align="right" width={50}/>
+      <Text x={currentTimePoint.x - 70 - getXOffset(day)} y={currentTimePoint.y-6} text={time} fontSize={15} fill='#eee' align="right" width={50}/>
     </Group>
   )
 }
@@ -132,7 +97,7 @@ const Lines = ({ day, dimensions }) => {
                 <Text key={index2}
                   x={line.points[0].x - (shape.color === 'blue' ? -30 : 140)} y={line.points[0].y - 6}
                   align={shape.color === 'blue' ? 'left' : 'right'}
-                  text={getMarkerText(line.type, shape.color)} fontSize={15} fill={shape.color}
+                  text={getMarkerText(day ,line.type, shape.color)} fontSize={15} fill={shape.color}
                   width={130}
                 />
               }
@@ -194,7 +159,7 @@ function timeToYValue(date, canvasHeight) {
   return timeY + 6;
 }
 
-function getMarkerText(markerType, color) {
+function getMarkerText(day, markerType, color) {
   const options = ['en-Gb', { hour: '2-digit', minute: '2-digit', hour12: false }];
   // clock-in and out
   if (color === 'green') {
@@ -225,6 +190,31 @@ function getMarkerText(markerType, color) {
   }
 }
 
-function repositionTimeLable(day, time) {
-
+function getXOffset(day) {
+  let canGoToRight = true;
+  const date = new Date();
+  const before= new Date();
+  const after = new Date();
+  before.setMinutes(date.getMinutes() - 20);
+  after.setMinutes(date.getMinutes() + 20);
+  console.log()
+  if (day['workStarts'].date < after && day['workStarts'].date > before) {
+    canGoToRight = false;
+  }
+  if (day['workEnds'].date < after && day['workEnds'].date > before) {
+    canGoToRight = false;
+  }
+  if (day['clockedIn'].dates < after && day['clockedIn'].dates > before) {
+    return canGoToRight ? -80 : 45;
+  }
+  if (day['clockedOut'].dates < after && day['clockedOut'].dates > before) {
+    return canGoToRight ? -80 : 45;
+  }
+  if (day['startedBreak'].dates < after && day['startedBreak'].dates > before) {
+    return canGoToRight ? -80 : 45;
+  }
+  if (day['endedBreak'].dates < after && day['endedBreak'].dates > before) {
+    return canGoToRight ? -80 : 45;
+  }
+  return 0;
 }

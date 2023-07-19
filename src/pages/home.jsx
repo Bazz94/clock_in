@@ -5,9 +5,10 @@ import { MyContext } from '../contexts/MyContextProvider.jsx';
 import SideDrawer from '../components/sideDrawer.jsx';
 import NavBar from '../components/navbar.jsx';
 import Timeline from '../components/timeline.jsx';
-import Status from '../components/status.jsx';
-import Stats from '../components/stats.jsx';
+import DashboardUI from '../components/dashboardUI.jsx';
 import Calendar from '../components/calander.jsx';
+import ScheduleUI from '../components/sheduleUI.jsx';
+import LeaveUI from '../components/leaveUI.jsx';
 
 const userData = {
   user_id: '123456789',
@@ -22,24 +23,50 @@ const userData = {
   leaveLeft: 21, 
 }
 
+function makeDate(offset = 0, hours = 0, mins = 0) {
+  const date = new Date();
+  if (hours !== null) {
+    date.setHours(hours);
+    date.setMinutes(mins);
+  }
+  date.setDate(date.getDate() - offset);
+  return date;
+}
+
 const days = [
   {
-    day_id: '2023-07-12',
-    date: '2023-07-12',
     status: 'current',
-    worked: 0,
-    events: [
-      {
-        event_id: '1',
-        timeStamp: 'timeStamp',
-        type: 'startWork',
-      },
-      {
-        event_id: '2',
-        timeStamp: 'timeStamp',
-        type: 'endWork',
-      },
-    ]
+    date: makeDate(0, null),
+    workStarts: {
+      date: makeDate(0,9)
+      //dates: null
+    },
+    workEnds: {
+      date: makeDate(0,20)
+      //dates: null
+    },
+    clockedIn: {
+      dates: makeDate(0,9) // turn into arrays, so users can clockIn multiple times
+      //dates: null
+    },
+    clockedOut: {
+      dates: makeDate(0,20) // turn into arrays, so users can clockOut multiple times
+      //dates: null
+    },
+    startedBreak: {
+      dates: null
+    },
+    endedBreak: {
+      dates: null
+    },
+  },
+  {
+    status: 'perfect',
+    date: makeDate(1, null),
+  },
+  {
+    status: 'late',
+    date: makeDate(2, null),
   }
 ]
 
@@ -49,6 +76,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [date, setDate] = useState(null);
+  const [currentTab, setCurrentTab] = useState('home');
+
+
 
   useEffect(() => {
     // Get data from api
@@ -61,30 +91,33 @@ export default function Home() {
   return isLoading ? (<Loading />) : (
     <div className="flex flex-col h-screen">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
-      <NavBar userData={userData} openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
+      <NavBar 
+        userData={userData} 
+        openSideDrawer={openSideDrawer} 
+        setOpenSideDrawer={setOpenSideDrawer}
+        setCurrentTab={setCurrentTab}
+      />
       <section className='flex flex-col items-center justify-center h-[90%] w-screen' >
-        <div className='flex flex-row justify-center w-full h-full p-5 lg:p-10 lg:w-5/6 max-w-7xl min-w-[16rem]'>
-          <div className='flex flex-col hidden w-1/2 md:w-1/3 sm:block'>
+        <div className='flex flex-row justify-center w-full h-full p-0 sm:p-5 md:w-5/6 lg:w-full xl:w-5/6 max-w-7xl min-w-[16rem]'>
+          <div className='flex-col hidden w-1/3 lg:flex'>
             <div className='flex items-center justify-center h-16'>
               <h1 className='text-xl'>{date}</h1>
             </div>
-            <div className='flex items-center justify-center mx-4 border shadow-md border-neutral-800 h-5/6 rounded-xl'>
-              <Timeline/>
+            <div className='flex items-center justify-center flex-1 mx-4 border shadow-md border-neutral-800 rounded-xl'>
+              <Timeline day={days[0]}/>
             </div>
           </div>
-          <div className='w-full sm:w-1/2 md:w-2/3 min-w-[16rem]'>
+          <div className='flex flex-col w-full lg:w-2/3 min-w-[16rem] justify-center'>
             <div className='flex items-center justify-center h-16 pr-6 ml-6'>
               <h1 className='text-xl'>Welcome</h1>
             </div>
-            <div className='flex flex-col flex-wrap flex-1 lg:flex-row '>
-              <div className='flex-1 m-4 mt-0 border shadow-md border-neutral-800 rounded-xl'>
-                <Status/>
-              </div>
-              <div className='flex-1 m-4 mt-0 border shadow-md border-neutral-800 rounded-xl'>
-                <Stats/>
-              </div>
-            </div>
-            <div className='hidden m-4 mb-0 border shadow-md border-neutral-800 rounded-xl h-1/3 lg:block'>
+            {currentTab === 'home' 
+              ? <DashboardUI/>  
+              : currentTab === 'schedule'
+                ? <ScheduleUI/> 
+                : <LeaveUI/>
+            }
+            <div className='m-2 mb-2 border shadow-md sm:m-4 sm:mb-0 sm:h-1/3 border-neutral-800 rounded-xl h-fit'>
               <Calendar days={days}/>
             </div>
           </div>
@@ -93,4 +126,8 @@ export default function Home() {
     </div>
   )
 }
+
+
+
+
 

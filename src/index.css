@@ -6,7 +6,8 @@
   background-color:#171717;
   width: 100vw;
   height: 100vh;
-
+  overflow: hidden;
+  position: fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -14,19 +15,23 @@
   -webkit-text-size-adjust: 100%;
 }
 
+html {
+  overflow: hidden;
+}
+
 /* Calender heatmap */
 
 .react-calendar-heatmap .color-scale-1 {
-  fill: #d6e685;
+  fill: blue;
 }
 .react-calendar-heatmap .color-scale-2 {
-  fill: #8cc665;
+  fill: yellow;
 }
 .react-calendar-heatmap .color-scale-3 {
-  fill: #44a340;
+  fill: red;
 }
 .react-calendar-heatmap .color-scale-4 {
-  fill: #1e6823;
+  fill: green;
 }
 
 .react-calendar-heatmap-weekday-label {

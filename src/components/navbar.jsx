@@ -1,6 +1,6 @@
 import Clock from '../components/clock.jsx';
 
-function NavBar({ userData, openSideDrawer, setOpenSideDrawer }) {
+function NavBar({ userData, openSideDrawer, setOpenSideDrawer, setCurrentTab }) {
 
   function clickUsername() {
     setTimeout(() => {
@@ -12,15 +12,15 @@ function NavBar({ userData, openSideDrawer, setOpenSideDrawer }) {
   }
 
   function clickHome() {
-    // do nothing 
+    setCurrentTab('home');
   }
 
   function clickSchedule() {
-    // Change ui 
+    setCurrentTab('schedule');
   }
 
   function clickLeave() {
-    // Change ui
+    setCurrentTab('leave');
   }
 
   return (
