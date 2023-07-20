@@ -1,26 +1,33 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useContext, useEffect, useRef, useCallback } from 'react';
+import { MyContext } from '../contexts/MyContextProvider.jsx';
+import { useNavigate } from "react-router-dom";
+
 
 function SideDrawer({ openSideDrawer, setOpenSideDrawer }) {
   const animation = `${openSideDrawer ? 'translate-x-0' : '-translate-x-full'} z-10 fixed top-0 left-0 transition-transform duration-300 ease-out w-64 h-full `
+  const { updateToken } = useContext(MyContext);
+  const navigate = useNavigate();
   const drawerRef = useRef(null);
   
+  const handleClickOutside = useCallback((event) => {
+    if (drawerRef.current && !drawerRef.current.contains(event.target)) {
+        document.removeEventListener('click', handleClickOutside);
+        setOpenSideDrawer(false)
+      }
+  },[setOpenSideDrawer]);
+
   useEffect(() => {
     document.addEventListener('click', handleClickOutside);
     return () => {
       document.removeEventListener('click', handleClickOutside);
     };
-  }, [openSideDrawer]);
+  }, [handleClickOutside]);
 
 
-  const handleClickOutside = (event) => {
-    if (drawerRef.current && !drawerRef.current.contains(event.target)) {
-        document.removeEventListener('click', handleClickOutside);
-        setOpenSideDrawer(false)
-      }
-  }
 
   function clickLogOut() {
-
+    updateToken(null);
+    navigate("/login");
   }
 
   function clickReset() {

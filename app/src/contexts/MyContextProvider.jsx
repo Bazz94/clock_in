@@ -6,6 +6,11 @@ const MyContext = createContext(null);
 // Create a provider component
 function MyContextProvider({ children }) {
   const [time, setTime] = useState(null);
+  const [token, setToken] = useState();
+
+  const updateToken = (newValue) => {
+    setToken(newValue);
+  }
 
   useEffect(() => {
     setTime(getTime());
@@ -14,14 +19,9 @@ function MyContextProvider({ children }) {
     }, 60 * 1000);
   }, []);
 
-  const [user_id, setUser_id] = useState();
-
-  const updateUser_id = (newValue) => {
-    setUser_id(newValue);
-  }
 
   return (
-    <MyContext.Provider value={{ user_id, updateUser_id, time }}>
+    <MyContext.Provider value={{ token, updateToken, time }}>
       {children}
     </MyContext.Provider>
   );

@@ -11,7 +11,7 @@ import ScheduleUI from '../components/scheduleUI.jsx';
 import LeaveUI from '../components/leaveUI.jsx';
 
 const userData = {
-  user_id: '123456789',
+  _id: '123456789',
   name: 'Cakemix',
   email: 'email@gmail.com',
   startedDate: '2023-07-01',
@@ -71,7 +71,7 @@ const days = [
 ]
 
 export default function Home() {
-  const { user_id, updateUser_id } = useContext(MyContext);
+  const { token } = useContext(MyContext);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
@@ -81,6 +81,10 @@ export default function Home() {
 
   useEffect(() => {
     // Get data from api
+    console.log(token);
+    if(!token) {
+      navigate("/login");
+    }
     const date = new Date();
     const options = { day: '2-digit', month: 'long', year: 'numeric' };
     const formattedDate = date.toLocaleDateString('en-UK', options);
