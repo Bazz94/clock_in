@@ -6,8 +6,8 @@ import SideDrawer from '../components/sideDrawer.jsx';
 import NavBar from '../components/navbar.jsx';
 import Timeline from '../components/timeline.jsx';
 import DashboardUI from '../components/dashboardUI.jsx';
-import Calendar from '../components/calander.jsx';
-import ScheduleUI from '../components/sheduleUI.jsx';
+import Calendar from '../components/calender.jsx';
+import ScheduleUI from '../components/scheduleUI.jsx';
 import LeaveUI from '../components/leaveUI.jsx';
 
 const userData = {
@@ -77,7 +77,6 @@ export default function Home() {
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [date, setDate] = useState(null);
   const [currentTab, setCurrentTab] = useState('home');
-
 
 
   useEffect(() => {
