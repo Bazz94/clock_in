@@ -27,7 +27,7 @@ app.use('/auth', authRouter);
 
 // Users
 import usersRouter from './routes/users.mjs';
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 
 // Days
 import daysRouter from './routes/days.mjs';

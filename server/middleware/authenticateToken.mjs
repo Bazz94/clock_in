@@ -3,15 +3,16 @@ import jwt from 'jsonwebtoken';
 function authToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
+  
   if (!token) {
-    return res.status(401).json({ message: "No token found" });
+    return res.status(401).json("No token found");
   }
 
-  jwt.verify(token, process.env.ACCESS_TOKEN, (err, tokenPayload) => {
+  jwt.verify(token, process.env.ACCESS_TOKEN, (err, auth) => {
     if (err) {
-      return res.status(401).json({ message: "Token not valid" });
+      return res.status(401).json({ message: "Token not valid", err: err });
     }
-    req.tokenPayload = tokenPayload;
+    req.auth = auth;
     next();
   })
 }

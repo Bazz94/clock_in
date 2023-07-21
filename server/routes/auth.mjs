@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from 'jsonwebtoken';
 
 
-// Get user id
+// Login
 router.get('/', async (req, res) => {
   const authorizationHeader = req.headers.authorization;
   let email, password;
@@ -16,10 +16,10 @@ router.get('/', async (req, res) => {
   }
   // check that the required vars are set
   if (!email) {
-    return res.status(400).json({ message: "email is required" });
+    return res.status(400).json("email is required");
   }
   if (!password) {
-    return res.status(400).json({ message: "password is required" });
+    return res.status(400).json("password is required");
   }
 
   const query = { email: email };
@@ -29,18 +29,16 @@ router.get('/', async (req, res) => {
     let users = await db.collection("users");
     let user = await users.findOne(query);
     if (!user) {
-      return res.status(400).json({ message: "credentials are incorrect" });
+      return res.status(400).json("credentials are incorrect");
     }
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.status(400).json({ message: "credentials are incorrect" });
+      return res.status(400).json("credentials are incorrect");
     }
 
-    const date = new Date();
+
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    date.setDate(date.getDate() + 7);
-    const expireDate = Math.floor(date.getTime() / 1000);
-    console.log(currentTimestamp, expireDate);
+    const expireDate = currentTimestamp + (60 * 60 * 24 * 7); // +7 days
     const payload = {
       aud: user._id,
       iat: currentTimestamp,
@@ -51,12 +49,12 @@ router.get('/', async (req, res) => {
     // return token
     res.status(200).json({ token: token });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res.status(500).json(err.message);
   }
 });
 
 
-// Create user
+// Create user and login
 router.post('/', async (req, res) => {
   const authorizationHeader = req.headers.authorization;
   let email, password, name;
@@ -68,13 +66,13 @@ router.post('/', async (req, res) => {
   }
   // check that the required vars are set
   if (!email) {
-    return res.status(400).json({ message: "email is required" });
+    return res.status(400).json("email is required");
   }
   if (!password) {
-    return res.status(400).json({ message: "password is required" });
+    return res.status(400).json("password is required");
   }
   if (!name) {
-    return res.status(400).json({ message: "username is required" });
+    return res.status(400).json("username is required");
   }
   // Hash password
   const saltRounds = 10;
@@ -82,10 +80,10 @@ router.post('/', async (req, res) => {
   try {
     hashedPassword = await bcrypt.hash(password, saltRounds);
   } catch(err) {
-    return res.status(500).json({ message: err.message });
+    return res.status(500).json(err.message);
   }
   if (!hashedPassword) {
-    return res.status(500).json({ message: "hashing failed" });
+    return res.status(500).json("hashing failed");
   }
 
   const query = { email: email };
@@ -98,14 +96,13 @@ router.post('/', async (req, res) => {
     let users = db.collection("users");
     let user = await users.findOne({query, options});
     if (user) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res.status(400).json("Email already exists");
     }
     // Create User
     const date = new Date();
     date.setHours(0);
     date.setMinutes(0);
     let newUser = {
-
       email: email,
       password: hashedPassword,
       name: name,
@@ -116,20 +113,19 @@ router.post('/', async (req, res) => {
       consistency: 100,
       sickUsed: 0,
       leaveLeft: 0, 
-      days: [
-        {
-          status: 'current',
-          date: date,
-        }
-      ],
+      schedule: null,
+      currentDay: {
+        status: 'current',
+        date: date,
+        worked: 0,
+      },
+      days: [],
     }
     let result = await users.insertOne(newUser);
 
     // Create token
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    date.setDate(date.getDate() + 7);
-    const expireDate = Math.floor(date.getTime() / 1000);
-    console.log(currentTimestamp, expireDate);
+    const expireDate = currentTimestamp + (60 * 60 * 24 * 7); // +7 days
     const payload = {
       aud: result.insertedId,
       iat: currentTimestamp,
@@ -140,7 +136,7 @@ router.post('/', async (req, res) => {
     // return user id
     res.status(200).json({ token: token });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    return res.status(500).json(err.message);
   }
 });
 

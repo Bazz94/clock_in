@@ -9,6 +9,8 @@ import DashboardUI from '../components/dashboardUI.jsx';
 import Calendar from '../components/calender.jsx';
 import ScheduleUI from '../components/scheduleUI.jsx';
 import LeaveUI from '../components/leaveUI.jsx';
+import config from '../config/config.js';
+import Popup from '../components/popup.jsx';
 
 const userData = {
   _id: '123456789',
@@ -37,6 +39,7 @@ const days = [
   {
     status: 'current',
     date: makeDate(0, null),
+    worked: 0,
     workStarts: {
       date: makeDate(0,9)
       //dates: null
@@ -71,24 +74,59 @@ const days = [
 ]
 
 export default function Home() {
-  const { token } = useContext(MyContext);
+  const { token, updateToken } = useContext(MyContext);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [openErrorDialog, setOpenErrorDialog] = useState(false);
+  const [redirect, setRedirect] = useState(false);
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [date, setDate] = useState(null);
   const [currentTab, setCurrentTab] = useState('home');
-
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Get data from api
     console.log(token);
     if(!token) {
       navigate("/login");
+      return () => {};
     }
     const date = new Date();
     const options = { day: '2-digit', month: 'long', year: 'numeric' };
     const formattedDate = date.toLocaleDateString('en-UK', options);
     setDate(formattedDate);
+
+    // get user info
+    const requestOptions = {
+      method: 'GET',
+      headers: {
+        'authorization': `Bearer ${token}`,
+      }
+    };
+    setIsLoading(true);
+    // eslint-disable-next-line no-undef
+    fetch(`${config.apiUrl}/user`, requestOptions)
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        if (res.status === 500) {
+          throw Error('Server error');
+        }
+        throw Error('Failed to connect to server');
+      }).then((data) => {
+        // Login and navigate to Home page
+        setUser(data.user);
+        setIsLoading(false);
+        navigate("/home");
+      }).catch((err) => {
+        setIsLoading(false);
+        setRedirect(true);
+        updateToken(null);
+        setErrorMessage(err.message);
+        setOpenErrorDialog(true);
+        return false;
+      });
   }, []);
 
   return isLoading ? (<Loading />) : (
@@ -126,6 +164,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <Popup
+        openErrorDialog={openErrorDialog}
+        setOpenErrorDialog={setOpenErrorDialog}
+        errorMessage={errorMessage}
+        redirect={redirect}
+      />
     </div>
   )
 }
