@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 import db from '../db/conn.mjs';
-import bcrypt from "bcrypt";
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 
@@ -57,6 +57,7 @@ router.get('/', async (req, res) => {
 // Create user and login
 router.post('/', async (req, res) => {
   const authorizationHeader = req.headers.authorization;
+  const timezone = req.body.timezone;
   let email, password, name;
   if (authorizationHeader) {
     const credentials = JSON.parse(authorizationHeader);
@@ -100,24 +101,47 @@ router.post('/', async (req, res) => {
     }
     // Create User
     const date = new Date();
-    date.setHours(0);
-    date.setMinutes(0);
     let newUser = {
       email: email,
       password: hashedPassword,
       name: name,
+      timezone: timezone,
       startedDate: date,
       worked7: 0,
       worked7goal: 0,
       streak: 0,
-      consistency: 100,
+      consistency: 100, // % of not bad days
       sickUsed: 0,
-      leaveLeft: 0, 
-      schedule: null,
+      leaveLeft: 0,
+      schedule: {
+        workStarts: null,
+        workEnds: null,
+        workdays: [],
+        scheduledSick: [],
+        scheduledLeave: [], 
+      },
       currentDay: {
         status: 'current',
         date: date,
         worked: 0,
+        workStarts: {
+          date: null
+        },
+        workEnds: {
+          date: null
+        },
+        clockedIn: {
+          dates: null
+        },
+        clockedOut: {
+          dates: null
+        },
+        startedBreak: {
+          dates: null
+        },
+        endedBreak: {
+          dates: null
+        },
       },
       days: [],
     }

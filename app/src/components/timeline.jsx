@@ -73,11 +73,15 @@ function CurrentTimeDot({day, dimensions, time}) {
 
 const Lines = ({ day, dimensions }) => {
   // console.log('rerendered');
-  let clockLine = { color: 'green', lines: calculateLinesFromDates(dimensions, day['clockedIn'].dates, day['clockedOut'].dates) };
-  let lateLine = { color: 'red', lines: calculateLinesFromDates(dimensions, day['workStarts'].date, day['clockedIn'].dates, false, day['workEnds'].date)};
-  let workLine = { color: 'blue', lines: calculateLinesFromDates(dimensions, day['workStarts'].date, day['workEnds'].date, true) };
-  let breakLine = { color: 'yellow', lines: calculateLinesFromDates(dimensions, day['startedBreak'].dates, day['endedBreak'].dates) };
-  const shapes = [clockLine, lateLine, workLine, breakLine];
+  let clockLine = { color: 'green', lines: calculateLinesFromDates(
+    dimensions, day['clockedIn'].dates, day['clockedOut'].dates )};
+  let lateLine = { color: 'red', lines: calculateLinesFromDates(
+    dimensions, day['workStarts'].date, day['clockedIn'].dates, false, day['workEnds'].date)};
+  let workLine = { color: 'blue', lines: calculateLinesFromDates(
+    dimensions, day['workStarts'].date, day['workEnds'].date, true)};
+  let breakLine = { color: 'yellow', lines: calculateLinesFromDates(
+    dimensions, day['startedBreak'].dates, day['endedBreak'].dates)};
+  const shapes = [ lateLine, workLine, clockLine, breakLine];
   return (
     <Group>
       {shapes.map((shape, index) => (
@@ -111,19 +115,22 @@ const Lines = ({ day, dimensions }) => {
 
 // late:  startWork  clock-in
 function calculateLinesFromDates(dimensions, start, end, isWork, isLateLine) {
+  const startDate = start ? new Date(start) : null; 
+  const endDate = end ? new Date(end) : null; 
   if (!start) {
     return [];
   }
   const xMid = dimensions.w / 2;
-  const startPoint = { x: xMid, y: timeToYValue(start, dimensions.h) }
+  const startPoint = { x: xMid, y: timeToYValue(startDate, dimensions.h) }
   if (isLateLine) {
     if (end && start >= end) {
       return [];
     }
     const date = new Date();
     if (date > isLateLine) {
+      const isLateLineDate = new Date(isLateLine);
       const line = {
-        type: 'line', points: [{ x: xMid, y: startPoint.y }, { x: xMid, y: timeToYValue(isLateLine, dimensions.h) }]
+        type: 'line', points: [{ x: xMid, y: startPoint.y }, { x: xMid, y: timeToYValue(isLateLineDate, dimensions.h) }]
       };
     return [line];
     }
@@ -137,7 +144,7 @@ function calculateLinesFromDates(dimensions, start, end, isWork, isLateLine) {
     };
     return [startMarker, line];
   }
-  const endPoint = { x: xMid, y: timeToYValue(end, dimensions.h) }
+  const endPoint = { x: xMid, y: timeToYValue(endDate, dimensions.h) }
   let endMarker = {
     type: 'end', points: [{ x: xMid - 10, y: endPoint.y }, { x: xMid + 10, y: endPoint.y }]
   };
@@ -164,28 +171,34 @@ function getMarkerText(day, markerType, color) {
   // clock-in and out
   if (color === 'green') {
     if (markerType === 'start') {
-      return day.clockedIn.dates.toLocaleTimeString(...options);
+      const date = new Date(day.clockedIn.dates);
+      return date.toLocaleTimeString(...options);
     }
     if (markerType === 'end') {
-      return day.clockedOut.dates.toLocaleTimeString(...options);
+      const date = new Date(day.clockedOut.dates);
+      return date.toLocaleTimeString(...options);
     }
   }
   // break start and stop
   if (color === 'yellow') {
     if (markerType === 'start') {
-      return day.startedBreak.dates.toLocaleTimeString(...options);
+      const date = new Date(day.startedBreak.dates);
+      return date.toLocaleTimeString(...options);
     }
     if (markerType === 'end') {
-      return day.endedBreak.dates.toLocaleTimeString(...options);
+      const date = new Date(day.endedBreak.dates);
+      return date.toLocaleTimeString(...options);
     }
   }
   // work starts and ends
   if (color === 'blue') {
     if (markerType === 'start') {
-      return day.workStarts.date.toLocaleTimeString(...options);
+      const date = new Date(day.workStarts.date);
+      return date.toLocaleTimeString(...options);
     }
     if (markerType === 'end') {
-      return day.workEnds.date.toLocaleTimeString(...options);
+      const date = new Date(day.workEnds.date);
+      return date.toLocaleTimeString(...options);
     }
   }
 }
@@ -197,24 +210,35 @@ function getXOffset(day) {
   const after = new Date();
   before.setMinutes(date.getMinutes() - 20);
   after.setMinutes(date.getMinutes() + 20);
-  console.log()
-  if (day['workStarts'].date < after && day['workStarts'].date > before) {
-    canGoToRight = false;
+  if (day['workStarts'].date) {
+    if (day['workStarts'].date < after && day['workStarts'].date > before) {
+      canGoToRight = false;
+    }
   }
-  if (day['workEnds'].date < after && day['workEnds'].date > before) {
-    canGoToRight = false;
+  if (day['workEnds'].date) {
+    if (day['workEnds'].date < after && day['workEnds'].date > before) {
+      canGoToRight = false;
+    }
   }
-  if (day['clockedIn'].dates < after && day['clockedIn'].dates > before) {
-    return canGoToRight ? -80 : 45;
+  if (day['clockedIn'].date) {
+    if (day['clockedIn'].dates < after && day['clockedIn'].dates > before) {
+      return canGoToRight ? -80 : 45;
+    }
   }
-  if (day['clockedOut'].dates < after && day['clockedOut'].dates > before) {
-    return canGoToRight ? -80 : 45;
+  if (day['clockedOut'].date) {
+    if (day['clockedOut'].dates < after && day['clockedOut'].dates > before) {
+      return canGoToRight ? -80 : 45;
+    }
   }
-  if (day['startedBreak'].dates < after && day['startedBreak'].dates > before) {
-    return canGoToRight ? -80 : 45;
+  if (day['startedBreak'].date) {
+    if (day['startedBreak'].dates < after && day['startedBreak'].dates > before) {
+      return canGoToRight ? -80 : 45;
+    }
   }
-  if (day['endedBreak'].dates < after && day['endedBreak'].dates > before) {
-    return canGoToRight ? -80 : 45;
+  if (day['endedBreak'].date) {
+    if (day['endedBreak'].dates < after && day['endedBreak'].dates > before) {
+      return canGoToRight ? -80 : 45;
+    }
   }
   return 0;
 }

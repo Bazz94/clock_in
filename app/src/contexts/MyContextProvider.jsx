@@ -1,15 +1,26 @@
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useEffect, useState, useRef } from 'react';
+import Cookies from 'js-cookie';
+import config from '../config/config';
 
 // Create a context
 const MyContext = createContext(null);
+const cookieOptions = { expires: 7, domain: config.domain, secure: true };
 
 // Create a provider component
 function MyContextProvider({ children }) {
+  const canStoreCookies = useRef(cookiesAvailable());
   const [time, setTime] = useState(null);
-  const [token, setToken] = useState();
+  const [token, setToken] = useState(canStoreCookies.current ? Cookies.get('token') : null);
 
   const updateToken = (newValue) => {
     setToken(newValue);
+    if (canStoreCookies.current) {
+      if (newValue == null) {
+        Cookies.remove('token', cookieOptions);
+        return false;
+      }
+      Cookies.set('token', newValue, cookieOptions);
+    }
   }
 
   useEffect(() => {
@@ -34,4 +45,16 @@ function getTime() {
   const date = new Date();
   const formattedTime = date.toLocaleTimeString(...options);
   return formattedTime;
+}
+
+
+function cookiesAvailable() {
+  try {
+    let testKey = 'test';
+    Cookies.set(testKey, testKey, cookieOptions);
+    Cookies.remove(testKey, cookieOptions);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

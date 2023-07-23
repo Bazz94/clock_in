@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-const Popup = ({ openErrorDialog, setOpenErrorDialog, errorMessage, redirect }) => {
+const Popup = ({ openErrorDialog, setOpenErrorDialog, errorMessage, redirect, updateToken }) => {
   const navigate = useNavigate();
   
   if (!openErrorDialog) return null;
@@ -9,6 +9,7 @@ const Popup = ({ openErrorDialog, setOpenErrorDialog, errorMessage, redirect }) 
     setOpenErrorDialog(false)
     if (redirect) {
       navigate("/login");
+      updateToken(null);
     }
   }
 

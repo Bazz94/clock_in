@@ -58,12 +58,16 @@ export default function Login() {
       return false;
     }
     // API call
+    const data = {
+      timezone: new Date().getTimezoneOffset(),
+    }
     const requestOptions = {
       method: 'POST',
       headers: {
         "Content-type": "application/json",
         'Authorization': JSON.stringify({ email: email, password: password, name: username })
-      }
+      },
+      body: JSON.stringify(data),
     };
     setIsLoading(true);
     // eslint-disable-next-line no-undef

@@ -1,45 +1,48 @@
 import Clock from '../components/clock.jsx';
 
-function NavBar({ userData, openSideDrawer, setOpenSideDrawer, setCurrentTab }) {
+function NavBar({ user, openSideDrawer, setOpenSideDrawer, currentTab, setCurrentTab }) {
 
   function clickUsername() {
     setTimeout(() => {
       setOpenSideDrawer(!openSideDrawer);
-    },0)
-    // Open side drawer
-    // reset button
-    // logout button
+    },0);
   }
 
   function clickHome() {
     setCurrentTab('home');
+    localStorage.setItem('tab', 'home');
   }
 
   function clickSchedule() {
     setCurrentTab('schedule');
+    localStorage.setItem('tab', 'schedule');
   }
 
   function clickLeave() {
     setCurrentTab('leave');
+    localStorage.setItem('tab', 'leave');
   }
 
   return (
     <nav className='flex justify-center w-screen h-20 bg-neutral-800'>
       <div className='flex content-center flex-1 max-w-7xl'>
-        <button className='w-1/3 p-5 text-xl hover:scale-105'
+        <button className='w-1/3 p-5 text-xl hover:scale-105 '
           onClick={clickUsername}>
-          {userData.name}
+          {user.name}
         </button>
         <div className='flex flex-row content-center justify-center w-1/3'>
-          <button className='w-1/3 text-xl hover:scale-105 focus:underline focus:text-orange-400'
+          <button className={`w-1/3 text-xl hover:scale-105
+            ${currentTab === 'home' ? selected : ''}`}
             onClick={clickHome}>
             Home
           </button>
-          <button className='w-1/3 text-xl hover:scale-105 focus:underline focus:text-orange-400'
+          <button className={`w-1/3 text-xl hover:scale-105 
+            ${currentTab === 'schedule' ? selected : ''}`}
             onClick={clickSchedule}>
             Schedule
           </button>
-          <button className='w-1/3 text-xl hover:scale-105 focus:underline focus:text-orange-400'
+          <button className={`w-1/3 text-xl hover:scale-105 
+            ${currentTab === 'leave' ? selected : ''}`}
             onClick={clickLeave}>
             Leave
           </button>
@@ -53,3 +56,5 @@ function NavBar({ userData, openSideDrawer, setOpenSideDrawer, setCurrentTab }) 
 }
 
 export default NavBar;
+
+const selected = "underline text-orange-400";

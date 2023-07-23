@@ -27,27 +27,27 @@ const typeToCount = {
   misused: 10,
 }
 
-function Calendar({days}) {
+function Calendar({user}) {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [tooltipText, setTooltipText] = useState('');
-  const [values, setValues] = useState([]);
+  const [values, setValues] = useState(null);
   
   useEffect(() => {
     const {from , to} = getFromAndToDates();
     setFromDate(from);
     setToDate(to);
-    setValues(populateEmptyDays(days));
-  }, [days])
+    setValues(populateEmptyDays(user.currentDay, user.days));
+  }, [user.currentDay, user.days])
 
   const handleMouseMove = (e) => {
     setTooltipPosition({ y: e.pageY, x: e.pageX });
   };
   return (
     <div className="flex w-full h-full px-4" onMouseMove={handleMouseMove}>
-      <CalendarHeatmap
+      {values && <CalendarHeatmap
         startDate={fromDate}
         endDate={toDate}
         values={values}
@@ -69,7 +69,7 @@ function Calendar({days}) {
           }
           return `color-scale-${value.count}`;
         }}
-      />
+      />}
       {showTooltip && (
         <span className={`absolute bg-white text-neutral-950 p-2 flex flex-col justify-center items-center rounded-lg animate-fadeOut`} 
           style={{ left: tooltipPosition.x -50 +'px', top: tooltipPosition.y - 70 + 'px' }}>
@@ -93,21 +93,28 @@ function getFromAndToDates() {
 }
 
 // needs useMemo
-function populateEmptyDays(data) {
+function populateEmptyDays(currentDay, days) {
+  const currentDate = new Date(currentDay.date);
+  const strCurrentDate = currentDate.toISOString().split('T')[0];
+  const newCurrentDay = { date: strCurrentDate, count: typeToCount[currentDay.status] }
   const newData = [];
-  let date = new Date();
+  const date = new Date();
   let index = 0;
   date.setDate(date.getDate() + 1);
-  for (let i = 0; i < 182; i++) {
+  for (let i = 0; i < 181; i++) {
     date.setDate(date.getDate() - 1);
     const strDate = date.toISOString().split('T')[0];
     let day = { date: strDate, count: 0 };
-    if (index < data.length && data[index].date.toISOString().split('T')[0] === strDate) {
-      day.count = typeToCount[data[index].status];
-      index++;
+    if (index < days.length) {
+      const dateObj = new Date(days[index].date);
+      if (dateObj.toISOString().split('T')[0] === strDate) {
+        day.count = typeToCount[days[index].status];
+        index++;
+      }
     }
     newData.push(day);
   }
+  newData.push(newCurrentDay);
   return newData;
 }
 

@@ -1,9 +1,15 @@
 import express, { json } from 'express';
 import cors from 'cors';
 import "./loadEnvironment.mjs";
+import rateLimit from 'express-rate-limit';
 
 
 const app = express();
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100, // Max number of requests per windowMs
+});
 
 // Set up CORS
 var corsOptions = {
@@ -12,6 +18,7 @@ var corsOptions = {
 }
 
 // Middleware
+app.use(limiter);
 app.use(cors(corsOptions));
 app.use(json());
 
@@ -26,12 +33,12 @@ import authRouter from './routes/auth.mjs';
 app.use('/auth', authRouter);
 
 // Users
-import usersRouter from './routes/users.mjs';
+import usersRouter from './routes/user.mjs';
 app.use('/user', usersRouter);
 
 // Days
-import daysRouter from './routes/days.mjs';
-app.use('/days', daysRouter);
+import daysRouter from './routes/write.mjs';
+app.use('/write', daysRouter);
 
 // Listen for connections
 app.listen(process.env.PORT, () => console.log('Server started'));

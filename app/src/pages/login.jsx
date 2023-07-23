@@ -16,10 +16,10 @@ export default function Login() {
 
 
   useEffect(() => {
-    if (token != null) {
+    if (token) {
       navigate("/home");
     }
-  }, [navigate, token]);
+  }, []);
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -124,4 +124,3 @@ export default function Login() {
     </div>
   )
 }
-

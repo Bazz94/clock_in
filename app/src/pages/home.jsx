@@ -12,66 +12,6 @@ import LeaveUI from '../components/leaveUI.jsx';
 import config from '../config/config.js';
 import Popup from '../components/popup.jsx';
 
-const userData = {
-  _id: '123456789',
-  name: 'Cakemix',
-  email: 'email@gmail.com',
-  startedDate: '2023-07-01',
-  worked7: 38,
-  worked7goal: 45,
-  streak: 68,
-  consistency: 98,
-  sickUsed: 3,
-  leaveLeft: 21, 
-}
-
-function makeDate(offset = 0, hours = 0, mins = 0) {
-  const date = new Date();
-  if (hours !== null) {
-    date.setHours(hours);
-    date.setMinutes(mins);
-  }
-  date.setDate(date.getDate() - offset);
-  return date;
-}
-
-const days = [
-  {
-    status: 'current',
-    date: makeDate(0, null),
-    worked: 0,
-    workStarts: {
-      date: makeDate(0,9)
-      //dates: null
-    },
-    workEnds: {
-      date: makeDate(0,20)
-      //dates: null
-    },
-    clockedIn: {
-      dates: makeDate(0,9) // turn into arrays, so users can clockIn multiple times
-      //dates: null
-    },
-    clockedOut: {
-      dates: makeDate(0,20) // turn into arrays, so users can clockOut multiple times
-      //dates: null
-    },
-    startedBreak: {
-      dates: null
-    },
-    endedBreak: {
-      dates: null
-    },
-  },
-  {
-    status: 'perfect',
-    date: makeDate(1, null),
-  },
-  {
-    status: 'late',
-    date: makeDate(2, null),
-  }
-]
 
 export default function Home() {
   const { token, updateToken } = useContext(MyContext);
@@ -82,7 +22,7 @@ export default function Home() {
   const [redirect, setRedirect] = useState(false);
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [date, setDate] = useState(null);
-  const [currentTab, setCurrentTab] = useState('home');
+  const [currentTab, setCurrentTab] = useState(localStorage.getItem('tab') ? localStorage.getItem('tab') : 'home');
   const [user, setUser] = useState(null);
 
   useEffect(() => {
@@ -91,6 +31,7 @@ export default function Home() {
       navigate("/login");
       return () => {};
     }
+
     const date = new Date();
     const options = { day: '2-digit', month: 'long', year: 'numeric' };
     const formattedDate = date.toLocaleDateString('en-UK', options);
@@ -104,7 +45,6 @@ export default function Home() {
       }
     };
     setIsLoading(true);
-    // eslint-disable-next-line no-undef
     fetch(`${config.apiUrl}/user`, requestOptions)
       .then((res) => {
         if (res.ok) {
@@ -122,22 +62,23 @@ export default function Home() {
       }).catch((err) => {
         setIsLoading(false);
         setRedirect(true);
-        updateToken(null);
         setErrorMessage(err.message);
         setOpenErrorDialog(true);
         return false;
       });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return isLoading ? (<Loading />) : (
     <div className="flex flex-col h-screen">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
-      <NavBar 
-        userData={userData} 
+      {user && <NavBar 
+        user={user} 
         openSideDrawer={openSideDrawer} 
         setOpenSideDrawer={setOpenSideDrawer}
+        currentTab={currentTab}
         setCurrentTab={setCurrentTab}
-      />
+      />}
       <section className='flex flex-col items-center justify-center h-[90%] w-screen' >
         <div className='flex flex-row justify-center w-full h-full p-0 sm:p-5 md:w-5/6 lg:w-full xl:w-5/6 max-w-7xl min-w-[16rem]'>
           <div className='flex-col hidden w-1/3 lg:flex'>
@@ -145,7 +86,7 @@ export default function Home() {
               <h1 className='text-xl'>{date}</h1>
             </div>
             <div className='flex items-center justify-center flex-1 mx-4 border shadow-md border-neutral-800 rounded-xl'>
-              <Timeline day={days[0]}/>
+              {user && <Timeline day={user.currentDay}/>}
             </div>
           </div>
           <div className='flex flex-col w-full lg:w-2/3 min-w-[16rem] justify-center'>
@@ -159,7 +100,7 @@ export default function Home() {
                 : <LeaveUI/>
             }
             <div className='m-2 mb-2 border shadow-md sm:m-4 sm:mb-0 sm:h-1/3 border-neutral-800 rounded-xl h-fit'>
-              <Calendar days={days}/>
+              {user && <Calendar user={user} />}
             </div>
           </div>
         </div>
@@ -169,11 +110,11 @@ export default function Home() {
         setOpenErrorDialog={setOpenErrorDialog}
         errorMessage={errorMessage}
         redirect={redirect}
+        updateToken={updateToken}
       />
     </div>
   )
 }
-
 
 
 
