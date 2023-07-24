@@ -23,7 +23,7 @@ export default function Home() {
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [date, setDate] = useState(null);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tab') ? localStorage.getItem('tab') : 'home');
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState();
 
   useEffect(() => {
     console.log(token);
@@ -54,7 +54,7 @@ export default function Home() {
           throw Error('Server error');
         }
         throw Error('Failed to connect to server');
-      }).then((data) => {
+    }).then((data) => {
         // Login and navigate to Home page
         setUser(data.user);
         setIsLoading(false);
@@ -93,11 +93,11 @@ export default function Home() {
             <div className='flex items-center justify-center h-16 pr-6 ml-6'>
               <h1 className='text-xl'>Welcome</h1>
             </div>
-            {currentTab === 'home' 
+            {user && (currentTab === 'home' 
               ? <DashboardUI/>  
               : currentTab === 'schedule'
-                ? <ScheduleUI/> 
-                : <LeaveUI/>
+                ? <ScheduleUI user={user}/> 
+                : <LeaveUI/>)
             }
             <div className='m-2 mb-2 border shadow-md sm:m-4 sm:mb-0 sm:h-1/3 border-neutral-800 rounded-xl h-fit'>
               {user && <Calendar user={user} />}
