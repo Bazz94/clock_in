@@ -1,31 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 
-const ScheduleUI = ({user}) => {
+const ScheduleUI = ({ schedule, scheduleDispatch }) => {
   const [editEnabled, setEditEnabled] = useState(false);
   const [workStartsError, setWorkStartsError] = useState(false);
   const [workEndsError, setWorkEndsError] = useState(false);
-  const [daysToWork, setDaysToWork] = useState([1,2,3,4,5]);
+  const [daysToWork, setDaysToWork] = useState([]);
   const [workStarts, setWorkStarts] = useState('08:00');
   const [workEnds, setWorkEnds] = useState('17:00');
   let estimateHr = useRef(0);
-  estimateHr = (daysToWork.length * (getTimeInMinutes(workEnds) - getTimeInMinutes(workStarts) - 60))/60;
+  if (workEnds) {
+    estimateHr.current = (daysToWork.length * (getTimeInMinutes(workEnds) - getTimeInMinutes(workStarts) - 60))/60;
+  }
 
   useEffect(() => {
-    console.log(user.schedule.workStarts);
-    if (user.schedule.workStarts) {
-      setWorkStarts(user.schedule.workStarts[10,5]);
+    if (schedule.workStarts) {
+      setWorkStarts(schedule.workStarts[10,5]);
     }
-    if (user.schedule.workEnds) {
-      setWorkEnds(user.schedule.workEnds[10, 5]);
+    if (schedule.workEnds) {
+      setWorkEnds(schedule.workEnds[10, 5]);
     }
-    if (user.schedule.workdays.length > 0) {
-      setDaysToWork(user.schedule.workdays);
+    if (schedule.workdays.length > 0) {
+      setDaysToWork(schedule.workdays);
     }
   },[])
 
   function handleSubmit(e) {
     e.preventDefault();
     if (editEnabled === true) {
+      scheduleDispatch({
+        type: 'set',
+        workStarts: stringToDate(workStarts),
+        workEnds: stringToDate(workEnds),
+        daysToWork: daysToWork
+      });
       // update database
       // update user
     }
@@ -85,7 +92,7 @@ const ScheduleUI = ({user}) => {
                 /> : <label className="w-32">{workEnds} </label>}
               </div>
               <div className="flex flex-col m-6 justify-center items-center w-[366px]">
-                <p className="">{estimateHr} hours per week</p>
+                <p className="">{estimateHr.current} hours per week</p>
                 <p className="text-sm">*includes 1 hr lunch per day</p>
               </div>
               <button className='w-16 p-2 mt-2 rounded-lg bg-neutral-600 text-md hover:scale-105' type="submit">
@@ -115,7 +122,6 @@ const WeekPicker = ({ editEnabled, daysToWork, setDaysToWork }) => {
             onClick={(e) => {
               e.preventDefault();
               if (!editEnabled) return false;
-              console.log('clicked', daysToWork.find(item => item === index) != null);
               daysToWork.find(day => day === index) != null
                 ? setDaysToWork(daysToWork.filter(item => item !== index))
                 : setDaysToWork([...daysToWork, index]);
@@ -134,4 +140,17 @@ const WeekPicker = ({ editEnabled, daysToWork, setDaysToWork }) => {
 function getTimeInMinutes(timeString) {
   const [hours, minutes] = timeString.split(":").map(Number);
   return hours * 60 + minutes;
+}
+
+// String in format "17:00"
+function stringToDate(string) {
+  const currentDate = new Date();
+  const [hours, minutes] = string.split(":").map(Number);
+  return new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    currentDate.getDate(),
+    hours,
+    minutes
+  );
 }

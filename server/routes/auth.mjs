@@ -111,14 +111,15 @@ router.post('/', async (req, res) => {
       worked7goal: 0,
       streak: 0,
       consistency: 100, // % of not bad days
-      sickUsed: 0,
-      leaveLeft: 0,
       schedule: {
-        workStarts: null,
-        workEnds: null,
+        startDate: null,
+        workStarts: "2023-07-23T08:00:00.000+00:00",
+        workEnds: "2023-07-23T17:00:00.000+00:00",
         workdays: [],
         scheduledSick: [],
         scheduledLeave: [], 
+        sickUsed: 0,
+        annulLeave: 0,
       },
       currentDay: {
         status: 'current',

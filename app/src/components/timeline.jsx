@@ -12,7 +12,7 @@ const Timeline = ({day}) => {
     if (parentRef) {
       setDimensions({ w: parentRef.current.offsetWidth, h: parentRef.current.offsetHeight });
     }
-  }, [parentRef]);
+  }, [parentRef, day]);
 
   return (
     <div ref={parentRef} className="flex-1 hidden w-96 sm:block" style={{height: '100%'}}>
@@ -59,10 +59,11 @@ const EmptyTimeLine = ({dimensions}) => {
   )
 }
 
-function CurrentTimeDot({day, dimensions, time}) {
+const CurrentTimeDot = ({day, dimensions, time}) => {
   const xMid = dimensions.w / 2;
   const date = new Date();
   const currentTimePoint = { x: xMid, y: timeToYValue(date, dimensions.h) };
+  console.log(getXOffset(day));
   return (
     <Group>
       <Circle x={currentTimePoint.x} y={currentTimePoint.y} radius={6} fill="#eee" />
@@ -72,7 +73,6 @@ function CurrentTimeDot({day, dimensions, time}) {
 }
 
 const Lines = ({ day, dimensions }) => {
-  // console.log('rerendered');
   let clockLine = { color: 'green', lines: calculateLinesFromDates(
     dimensions, day['clockedIn'].dates, day['clockedOut'].dates )};
   let lateLine = { color: 'red', lines: calculateLinesFromDates(
@@ -205,11 +205,15 @@ function getMarkerText(day, markerType, color) {
 
 function getXOffset(day) {
   let canGoToRight = true;
-  const date = new Date();
-  const before= new Date();
-  const after = new Date();
+  let date = new Date();
+  let before= new Date();
+  let after = new Date();
   before.setMinutes(date.getMinutes() - 20);
   after.setMinutes(date.getMinutes() + 20);
+  date = date.toISOString();
+  before = before.toISOString();
+  after = after.toISOString()
+
   if (day['workStarts'].date) {
     if (day['workStarts'].date < after && day['workStarts'].date > before) {
       canGoToRight = false;
@@ -220,22 +224,22 @@ function getXOffset(day) {
       canGoToRight = false;
     }
   }
-  if (day['clockedIn'].date) {
+  if (day['clockedIn'].dates) {
     if (day['clockedIn'].dates < after && day['clockedIn'].dates > before) {
       return canGoToRight ? -80 : 45;
     }
   }
-  if (day['clockedOut'].date) {
+  if (day['clockedOut'].dates) {
     if (day['clockedOut'].dates < after && day['clockedOut'].dates > before) {
       return canGoToRight ? -80 : 45;
     }
   }
-  if (day['startedBreak'].date) {
+  if (day['startedBreak'].dates) {
     if (day['startedBreak'].dates < after && day['startedBreak'].dates > before) {
       return canGoToRight ? -80 : 45;
     }
   }
-  if (day['endedBreak'].date) {
+  if (day['endedBreak'].dates) {
     if (day['endedBreak'].dates < after && day['endedBreak'].dates > before) {
       return canGoToRight ? -80 : 45;
     }

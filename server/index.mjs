@@ -36,9 +36,13 @@ app.use('/auth', authRouter);
 import usersRouter from './routes/user.mjs';
 app.use('/user', usersRouter);
 
-// Days
-import daysRouter from './routes/write.mjs';
-app.use('/write', daysRouter);
+// CurrentDay
+import currentDayRouter from './routes/currentDay.mjs';
+app.use('/currentDay', currentDayRouter);
+
+// Schedule
+import scheduleRouter from './routes/schedule.mjs';
+app.use('/schedule', scheduleRouter);
 
 // Listen for connections
 app.listen(process.env.PORT, () => console.log('Server started'));
