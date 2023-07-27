@@ -23,7 +23,7 @@ router.get('/', authToken, async (req, res) => {
     // Checking if currentDay has passed
     const date = new Date();
     const currentDayDate = new Date(user.currentDay.date);
-    
+
     if (!sameDay(date, currentDayDate, user.timezone)) {
       // Push currentDay to days and init currentDay
       console.log('New Day');
@@ -56,7 +56,7 @@ router.get('/', authToken, async (req, res) => {
     }
     
     // Return user
-    return res.status(200).json({ user: user });
+    return res.status(200).json(user);
   } catch (err) {
     return res.status(500).json(err.message);
   }
@@ -67,6 +67,7 @@ export default router;
 
 function sameDay(date1, date2, timezone) {
   // adjust time to users timezone
+  
   const newDate1 = new Date(date1);
   newDate1.setMinutes(newDate1.getMinutes() - timezone); // node uses utc time
   const newDate2 = new Date(date2);
@@ -154,18 +155,19 @@ function determineNewCurrentDay(schedule, timezone) {
 
 function determineStatus(day, schedule, timezone) {
   const date = new Date();
-  // No schedule
-  if (schedule.workdays.length === 0 || sameDay(day.date, schedule.startDate, timezone)) {
-    if (day.clockedIn.dates && day.clockedOut.dates) return 'perfect';
-    return 'none';
-  }
-
+ 
   // Not working today
   const isLeaveDay = schedule.scheduledLeave.find(leaveDate => sameDay(new Date(leaveDate), date, timezone));
   if (isLeaveDay) return 'leave';
   const isSickDay = schedule.scheduledSick.find(sickDate => sameDay(new Date(sickDate), date, timezone));
   if (isSickDay) return 'sick';
   if (!schedule.workdays.find(day => day === date.getDay())) return 'offDay';
+
+  // No schedule
+  if (!day.workStarts.date) {
+    if (day.clockedIn.dates && day.clockedOut.dates) return 'perfect';
+    return 'none';
+  }
 
   // Working today 
   if (!day.clockedIn.dates) return 'absent';

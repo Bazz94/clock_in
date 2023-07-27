@@ -3,25 +3,25 @@
 */
 import { useReducer } from "react";
 
-// Initial values for the reducer object
-const initObj = {
-  workStarts: null,
-  workEnds: null,
-  workdays: [],
-  scheduledSick: [],
-  scheduledLeave: []
-};
 
 // Handles changes made to properties
 function reducer(state, action) {
   switch (action.type) {
+    // set all
+    case 'init': {
+      if (action.currentDay === undefined) {
+        throw Error('Incorrect properties for init on useCurrentDayReducer');
+      }
+      return { ...action.currentDay };
+    }
     // set
     case 'set': {
       // Check that the required vars are set from action param
-      if (action.workStarts === undefined && action.workEnds === undefined && action.workdays === undefined
-        && action.scheduledSick === undefined && action.scheduledLeave === undefined
+      if (action.status === undefined && action.worked === undefined && action.workStarts === undefined
+        && action.workEnds === undefined && action.clockedIn === undefined && action.clockedOut === undefined
+        && action.startedBreak === undefined && action.endedBreak === undefined
       ) {
-        throw Error('Incorrect properties for set on scheduleReducer');
+        throw Error('Incorrect properties for set on useCurrentDayReducer');
       }
       // If a property is set in the action param then it gets set in the reducers state
       return Object.fromEntries(
@@ -35,22 +35,16 @@ function reducer(state, action) {
         })
       );
     }
-    // set all
-    case 'init': {
-      if (action.schedule === undefined) {
-        throw Error('Incorrect properties for init on scheduleReducer');
-      }
-      return { ...action.schedule };
-    }
+   
     default: {
       throw Error('Unknown action: ' + action.type);
     }
   }
 }
 
-const useScheduleReducer = () => {
-  const [state, dispatch] = useReducer(reducer, initObj);
+const useCurrentDayReducer = () => {
+  const [state, dispatch] = useReducer(reducer, null);
   return [state, dispatch];
 };
 
-export default useScheduleReducer;
+export default useCurrentDayReducer;

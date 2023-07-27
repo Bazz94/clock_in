@@ -9,20 +9,18 @@ import DashboardUI from '../components/dashboardUI.jsx';
 import Calendar from '../components/calender.jsx';
 import ScheduleUI from '../components/scheduleUI.jsx';
 import LeaveUI from '../components/leaveUI.jsx';
-import config from '../config/config.js';
 import Popup from '../components/popup.jsx';
-import useUserReducer from '../reducers/user.jsx';
-import useCurrentDayReducer from '../reducers/currentDay.jsx';
-import useScheduleReducer from '../reducers/schedule.jsx';
+import useUserReducer from '../reducers/useUserReducer.jsx';
+import useCurrentDayReducer from '../reducers/useCurrentDayReducer.jsx';
+import useScheduleReducer from '../reducers/useScheduleReducer.jsx';
+import { updateDB, getUserFromDB } from '../fetch/serverRequests.jsx';
 
 
 export default function Home() {
-  const { token, updateToken } = useContext(MyContext);
   const navigate = useNavigate();
+  const { token, updateToken } = useContext(MyContext);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [openErrorDialog, setOpenErrorDialog] = useState(false);
-  const [redirect, setRedirect] = useState(false);
+  const [error, setError] = useState(false); // {message: 'error', redirect: false}
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [date, setDate] = useState(null);
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tab') ? localStorage.getItem('tab') : 'home');
@@ -31,8 +29,8 @@ export default function Home() {
   const [schedule, scheduleDispatch] = useScheduleReducer();
   
   useEffect(() => {
-    console.log(token);
-    if(!token) {
+    console.log('token:',token.slice(0, 20));
+    if (!token) {
       navigate("/login");
       return () => {};
     }
@@ -42,87 +40,49 @@ export default function Home() {
     const formattedDate = date.toLocaleDateString('en-UK', options);
     setDate(formattedDate);
 
-    // get user info
-    const requestOptions = {
-      method: 'GET',
-      headers: {
-        'authorization': `Bearer ${token}`,
-      }
-    };
+    // Get user data
     setIsLoading(true);
-    fetch(`${config.apiUrl}/user`, requestOptions)
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
-        if (res.status === 500) {
-          throw Error('Server error');
-        }
-        throw Error('Failed to connect to server');
-    }).then((data) => {
-        // Login and navigate to Home page
-        userDispatch({
-          type: 'init',
-          user: data.user
-        });
-        currentDayDispatch({
-          type: 'init',
-          currentDay: data.user.currentDay
-        });
-
-        scheduleDispatch({
-          type: 'init',
-          schedule: data.user.schedule
-        });
-        setIsLoading(false);
-        navigate("/home");
-      }).catch((err) => {
-        setIsLoading(false);
-        setRedirect(true);
-        setErrorMessage(err.message);
-        setOpenErrorDialog(true);
-        return false;
+    getUserFromDB(token, 'user').then(data => {
+      userDispatch({
+        type: 'init',
+        user: data
       });
+      currentDayDispatch({
+        type: 'init',
+        currentDay: data.currentDay
+      });
+      scheduleDispatch({
+        type: 'init',
+        schedule: data.schedule
+      });
+    }).catch(err => {
+      setError({message: err.message, redirect: true});
+    }).finally(() => setIsLoading(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (currentDay.status === null) {
+    if (!currentDay) {
       return () => {};
     }
-    const data = {
-      currentDay: currentDay,
-    }
-    const requestOptions = {
-      method: 'PATCH',
-      headers: {
-        "Content-type": "application/json",
-        'authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    };
-    fetch(`${config.apiUrl}/currentDay`, requestOptions)
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
-        if (res.status === 500) {
-          throw Error('Server error');
-        }
-        throw Error('Failed to connect to server');
-      }).then((data) => {
-        // Login and navigate to Home page
-        console.log(data);
-      }).catch((err) => {
-        console.log(err.message);
-        return false;
-      });
+    updateDB(token, 'currentDay',currentDay).then((value) => {
+      console.log(value);
+    });
   }, [currentDay]);
+
+  useEffect(() => {
+    if (!schedule) {
+      return () => {};
+    }
+    updateDB(token, 'schedule', schedule).then((value) => {
+      console.log(value);
+    });
+  }, [schedule]);
 
   return isLoading ? (<Loading />) : (
     <div className="flex flex-col h-screen">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
-      {user._id && <NavBar 
+      {user && <NavBar 
         user={user} 
         openSideDrawer={openSideDrawer} 
         setOpenSideDrawer={setOpenSideDrawer}
@@ -136,30 +96,28 @@ export default function Home() {
               <h1 className='text-xl'>{date}</h1>
             </div>
             <div className='flex items-center justify-center flex-1 mx-4 border shadow-md border-neutral-800 rounded-xl'>
-              {user._id && <Timeline day={currentDay}/>}
+              {user && <Timeline day={currentDay}/>}
             </div>
           </div>
           <div className='flex flex-col w-full lg:w-2/3 min-w-[16rem] justify-center'>
             <div className='flex items-center justify-center h-16 pr-6 ml-6'>
               <h1 className='text-xl'>Welcome</h1>
             </div>
-            {user._id && (currentTab === 'home' 
+            {user && (currentTab === 'home' 
               ? <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch} />  
               : currentTab === 'schedule'
                 ? <ScheduleUI schedule={schedule} scheduleDispatch={scheduleDispatch}/> 
-                : <LeaveUI/>)
+                : <LeaveUI schedule={schedule} scheduleDispatch={scheduleDispatch} />)
             }
             <div className='m-2 mb-2 border shadow-md sm:m-4 sm:mb-0 sm:h-1/3 border-neutral-800 rounded-xl h-fit'>
-              {user._id && <Calendar user={user} />}
+              {user && <Calendar user={user} />}
             </div>
           </div>
         </div>
       </section>
       <Popup
-        openErrorDialog={openErrorDialog}
-        setOpenErrorDialog={setOpenErrorDialog}
-        errorMessage={errorMessage}
-        redirect={redirect}
+        error={error}
+        setError={setError}
         updateToken={updateToken}
       />
     </div>

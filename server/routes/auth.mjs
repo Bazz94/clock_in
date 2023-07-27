@@ -112,9 +112,8 @@ router.post('/', async (req, res) => {
       streak: 0,
       consistency: 100, // % of not bad days
       schedule: {
-        startDate: null,
-        workStarts: "2023-07-23T08:00:00.000+00:00",
-        workEnds: "2023-07-23T17:00:00.000+00:00",
+        workStarts: null,
+        workEnds: null,
         workdays: [],
         scheduledSick: [],
         scheduledLeave: [], 

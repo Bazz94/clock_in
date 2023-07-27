@@ -63,7 +63,6 @@ const CurrentTimeDot = ({day, dimensions, time}) => {
   const xMid = dimensions.w / 2;
   const date = new Date();
   const currentTimePoint = { x: xMid, y: timeToYValue(date, dimensions.h) };
-  console.log(getXOffset(day));
   return (
     <Group>
       <Circle x={currentTimePoint.x} y={currentTimePoint.y} radius={6} fill="#eee" />
@@ -142,6 +141,9 @@ function calculateLinesFromDates(dimensions, start, end, isWork, isLateLine) {
     let line = {
       type: 'line', points: [{ x: xMid, y: startPoint.y }, { x: xMid, y: currentTimePoint.y }]
     };
+    if (date < startDate) {
+      return [];
+    }
     return [startMarker, line];
   }
   const endPoint = { x: xMid, y: timeToYValue(endDate, dimensions.h) }

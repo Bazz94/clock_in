@@ -4,7 +4,6 @@ import config from '../config/config.js';
 
 
 const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
-  const { token } = useContext(MyContext);
   const [currentEvent, setCurrentEvent] = useState('');
   const [clockInButtonText, setClockInButton] = useState('Clock-in');
   const [breakStartButtonText, setBreakStartButtonText] = useState('Start break');

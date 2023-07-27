@@ -9,8 +9,7 @@ export default function Login() {
   const { token, updateToken } = useContext(MyContext);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [openErrorDialog, setOpenErrorDialog] = useState(false);
+  const [error, setError] = useState(false); // {message: 'error', redirect: false}
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -25,24 +24,20 @@ export default function Login() {
     e.preventDefault();
     // Format validation
     if (!email) {
-      setErrorMessage('Please enter a email');
-      setOpenErrorDialog(true);
+      setError({ message: 'Please enter an email'});
       return false;
     }
     if (!password) {
-      setErrorMessage('Please enter a password');
-      setOpenErrorDialog(true);
+      setError({ message: 'Please enter a password' });
       return false;
     }
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(email)) {
-      setErrorMessage('Incorrect email or password');
-      setOpenErrorDialog(true);
+      setError({ message: 'Incorrect email or password' });
       return false;
     }
     if (password.length < 8) {
-      setErrorMessage('Incorrect email or password');
-      setOpenErrorDialog(true);
+      setError({ message: 'Incorrect email or password' });
       return false;
     }
     // API call
@@ -73,8 +68,7 @@ export default function Login() {
       navigate("/home");
     }).catch((err) => {
       setIsLoading(false);
-      setErrorMessage(err.message);
-      setOpenErrorDialog(true);
+      setError({ message: 'Login failed: ' + err.message });
       return false;
     });
   }
@@ -117,9 +111,8 @@ export default function Login() {
         </div>
       </form>
       <Popup
-        openErrorDialog={openErrorDialog}
-        setOpenErrorDialog={setOpenErrorDialog}
-        errorMessage={errorMessage}
+        error={error}
+        setError={setError}
       />
     </div>
   )

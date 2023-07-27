@@ -14,10 +14,12 @@ const ScheduleUI = ({ schedule, scheduleDispatch }) => {
 
   useEffect(() => {
     if (schedule.workStarts) {
-      setWorkStarts(schedule.workStarts[10,5]);
+      const date = new Date(schedule.workStarts);
+      setWorkStarts(dateToString(date));
     }
     if (schedule.workEnds) {
-      setWorkEnds(schedule.workEnds[10, 5]);
+      const date = new Date(schedule.workEnds);
+      setWorkEnds(dateToString(date));
     }
     if (schedule.workdays.length > 0) {
       setDaysToWork(schedule.workdays);
@@ -27,14 +29,13 @@ const ScheduleUI = ({ schedule, scheduleDispatch }) => {
   function handleSubmit(e) {
     e.preventDefault();
     if (editEnabled === true) {
+      console.log('updating: ', workStarts, workEnds, daysToWork);
       scheduleDispatch({
         type: 'set',
         workStarts: stringToDate(workStarts),
         workEnds: stringToDate(workEnds),
-        daysToWork: daysToWork
+        workdays: daysToWork,
       });
-      // update database
-      // update user
     }
     setEditEnabled(!editEnabled);
   }
@@ -153,4 +154,13 @@ function stringToDate(string) {
     hours,
     minutes
   );
+}
+
+function dateToString(date) {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const formattedHours = hours < 10 ? `0${hours}` : hours;
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  const formattedTime = `${formattedHours}:${formattedMinutes}`;
+  return formattedTime;
 }
