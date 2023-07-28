@@ -118,7 +118,8 @@ router.post('/', async (req, res) => {
         scheduledSick: [],
         scheduledLeave: [], 
         sickUsed: 0,
-        annulLeave: 0,
+        annulLeave: 18,
+        leaveUsed: 0,
       },
       currentDay: {
         status: 'current',
