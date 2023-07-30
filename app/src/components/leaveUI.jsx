@@ -9,33 +9,6 @@ const LeaveUI = ({ schedule, scheduleDispatch}) => {
   const [openPopup, setOpenPopup] = useState(false);
   const [isRemove, setIsRemove] = useState('add');
 
-
-  // function handleSubmit(e, type) {
-  //   e.preventDefault();
-  //   if (type) setLeaveType(type);
-  //   if (editEnabled && leaveType === 'leave') {
-  //     if (schedule.leaveUsed - 1 < 0) {
-  //       console.log('No leave left')
-  //     } else {
-  //       scheduleDispatch({
-  //         type: 'set',
-  //         scheduledLeave: [...schedule.scheduledLeave, selectedDay],
-  //         leaveUsed: schedule.leaveUsed - 1,
-  //       });
-  //       console.log('flag1');
-  //     }
-  //   } 
-  //   if (editEnabled && leaveType === 'sick') {
-  //     scheduleDispatch({
-  //       type: 'set',
-  //       scheduledSick: [ ...schedule.scheduledSick, selectedDay],
-  //       sickUsed: schedule.sickUsed + 1,
-  //     });
-  //     console.log('flag2');
-  //   }
-  //   setOpenConfirm(!openConfirm);
-  //   setEditEnabled(!editEnabled);
-  // }
   return (
     <div className='relative flex flex-row flex-wrap sm:flex-1 min-h-[400px]'>
       <div className='flex-1 h-full m-2 mt-0 border shadow-md sm:m-4 sm:mt-0 border-neutral-800 rounded-xl'>

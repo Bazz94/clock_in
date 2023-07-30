@@ -29,7 +29,6 @@ const ScheduleUI = ({ schedule, scheduleDispatch }) => {
   function handleSubmit(e) {
     e.preventDefault();
     if (editEnabled === true) {
-      console.log('updating: ', workStarts, workEnds, daysToWork);
       scheduleDispatch({
         type: 'set',
         workStarts: stringToDate(workStarts),

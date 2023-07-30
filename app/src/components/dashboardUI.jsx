@@ -1,4 +1,4 @@
-import { useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState, useRef } from "react";
 import { MyContext } from '../contexts/MyContextProvider.jsx';
 import config from '../config/config.js';
 
@@ -9,10 +9,14 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
   const [breakStartButtonText, setBreakStartButtonText] = useState('Start break');
   const [working, setWorking] = useState(false);
   const [onBreak, setOnBreak] = useState(false);
+  let worked = useRef(0);
 
   useEffect(() => {
-    
-  }, [])
+    worked.current = calculateHrsWorked(currentDay);
+    setTimeout(() => {
+      worked.current = calculateHrsWorked(currentDay);
+    },1000 * 60);
+  }, []);
 
   useEffect(() => {
     if (currentEvent === 'Working' || currentEvent === 'On break') {
@@ -108,7 +112,7 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
           <p className="p-1 text-lg">
             Work day</p>
           <p className="pb-4 text-2xl">
-            {currentDay.worked}</p>
+            {worked.current ? dateToString(worked.current) : '00:00'}</p>
           <p className="pb-1 text-lg">
             Work Week</p>
           <p className="pb-4 text-2xl">
@@ -146,4 +150,36 @@ function calculateCurrentEvent(currentDay) {
     return 'Done working';
   }
   return 'None';
+}
+
+
+function calculateHrsWorked(currentDay) {
+  if (!currentDay) return new Date('2023-07-28T00:00:00.000+02:00');
+  const now = new Date();
+  if (currentDay.clockedIn.dates) {
+    const WorkStarted = new Date(currentDay.clockedIn.dates);
+    WorkStarted.setSeconds(0);
+    if (currentDay.clockedOut.dates) {
+      const WorkEnded = new Date(currentDay.clockedOut.dates);
+      return getDifferenceAsDate(WorkEnded, WorkStarted);
+    } else {
+      return getDifferenceAsDate(now, WorkStarted);
+    }
+  }
+  return new Date('2023-07-28T00:00:00.000+02:00');
+}
+
+function getDifferenceAsDate(date1, date2) {
+  const differenceInMilliseconds = Math.abs(date1 - date2);
+  const differenceDate = new Date(differenceInMilliseconds - (1000 * 60 * 60 * 2));
+  return differenceDate;
+}
+
+function dateToString(date) {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const formattedHours = hours < 10 ? `0${hours}` : hours;
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  const formattedTime = `${formattedHours}:${formattedMinutes}`;
+  return formattedTime;
 }

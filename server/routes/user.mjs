@@ -73,6 +73,11 @@ function sameDay(date1, date2, timezone) {
   const newDate2 = new Date(date2);
   newDate2.setMinutes(newDate2.getMinutes() - timezone); // node uses utc time
   const result = newDate1.toISOString().slice(0, 10) === newDate2.toISOString().slice(0, 10);
+
+  // console.log(newDate1.toISOString().slice(0, 10));
+  // console.log(newDate2.toISOString().slice(0, 10));
+  // console.log(result);
+
   return result;
 }
 
@@ -109,23 +114,27 @@ function determineNewCurrentDay(schedule, timezone) {
   if (schedule.workdays.length === 0) {
     return initCurrentDay;
   }
-  
+
   // Not working today
   const isLeaveDay = schedule.scheduledLeave.find(leaveDate => sameDay(new Date(leaveDate), date, timezone));
   if (isLeaveDay) {
     return initCurrentDay;
   }
+
   const isSickDay = schedule.scheduledSick.find(sickDate => sameDay(new Date(sickDate), date, timezone));
   if (isSickDay) {
     return initCurrentDay;
   }
-  if (!schedule.workdays.find(day => day === date.getDay())) {
+
+  if (schedule.workdays.find(day => day === date.getDay()) == null) {
     return initCurrentDay;
   } 
 
   // determine work schedule day
   const workStarts = getCurrentDateWithTimeOf(new Date(schedule.workStarts), timezone);
   const workEnds = getCurrentDateWithTimeOf(new Date(schedule.workEnds), timezone);
+
+  console.log(workStarts, workEnds);
 
   // Return new currentDay
   return {
@@ -161,7 +170,7 @@ function determineStatus(day, schedule, timezone) {
   if (isLeaveDay) return 'leave';
   const isSickDay = schedule.scheduledSick.find(sickDate => sameDay(new Date(sickDate), date, timezone));
   if (isSickDay) return 'sick';
-  if (!schedule.workdays.find(day => day === date.getDay())) return 'offDay';
+  if (schedule.workdays.find(day => day === date.getDay() == null)) return 'offDay';
 
   // No schedule
   if (!day.workStarts.date) {

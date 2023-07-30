@@ -28,6 +28,7 @@ export default function Home() {
   const [currentDay, currentDayDispatch] = useCurrentDayReducer();
   const [schedule, scheduleDispatch] = useScheduleReducer();
   
+  
   useEffect(() => {
     console.log('token:',token.slice(0, 20));
     if (!token) {
@@ -55,6 +56,7 @@ export default function Home() {
         type: 'init',
         schedule: data.schedule
       });
+      
     }).catch(err => {
       setError({message: err.message, redirect: true});
     }).finally(() => setIsLoading(false));
@@ -78,6 +80,9 @@ export default function Home() {
       console.log(value);
     });
   }, [schedule]);
+
+  
+  
 
   return isLoading ? (<Loading />) : (
     <div className="flex flex-col h-screen">
@@ -123,6 +128,7 @@ export default function Home() {
     </div>
   )
 }
+
 
 
 
