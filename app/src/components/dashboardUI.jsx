@@ -12,9 +12,10 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
   let worked = useRef(0);
 
   useEffect(() => {
-    worked.current = calculateHrsWorked(currentDay);
+    worked.current = calculateWorked(currentDay);
     setTimeout(() => {
-      worked.current = calculateHrsWorked(currentDay);
+      console.log('tick');
+      worked.current = calculateWorked(currentDay);
     },1000 * 60);
   }, []);
 
@@ -43,50 +44,43 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
       setWorking(false);
       currentDayDispatch({
         type: 'set',
-        clockedOut: {
-          dates: date.toISOString()
-        }
+        clockedOut: [...currentDay.clockedOut, date.toISOString()]
       });
       if (onBreak) {
         setOnBreak(false);
         currentDayDispatch({
           type: 'set',
-          endedBreak: {
-            dates: date.toISOString()
-          }
+          endedBreak: [...currentDay.endedBreak, date.toISOString()]
         });
       }
     } else {
       setWorking(true);
       currentDayDispatch({
         type: 'set',
-        clockedIn: {
-          dates: date.toISOString()
-        }
+        clockedIn: [...currentDay.clockedIn, date.toISOString()]
       });
     }
   }
 
+
   function handleBreak() {
+    const date = new Date();
     if (onBreak) {
       setOnBreak(false);
       currentDayDispatch({
         type: 'set',
-        endedBreak: {
-          dates: new Date()
-        }
+        endedBreak: [...currentDay.endedBreak, date.toISOString()]
       });
     } else {
       setOnBreak(true);
       currentDayDispatch({
         type: 'set',
-        startedBreak: {
-          dates: new Date()
-        }
+        startedBreak: [...currentDay.startedBreak, date.toISOString()]
       });
     }
   }
 
+  
   return (
     <div className='flex flex-row flex-wrap sm:flex-1 min-h-[400px]'>
       <div className='flex-1 m-2 mt-0 border shadow-md sm:m-4 sm:mt-0 border-neutral-800 rounded-xl'>
@@ -112,7 +106,7 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
           <p className="p-1 text-lg">
             Work day</p>
           <p className="pb-4 text-2xl">
-            {worked.current ? dateToString(worked.current) : '00:00'}</p>
+            {worked.current ? mSecondsDateToString(worked.current) : '00:00'}</p>
           <p className="pb-1 text-lg">
             Work Week</p>
           <p className="pb-4 text-2xl">
@@ -135,47 +129,50 @@ export default DashboardUI;
 
 
 function calculateCurrentEvent(currentDay) {
+  let result = 'None';
   const currentTime = 20;
-  if (currentDay.workStarts.date && !currentDay.clockedIn.dates && currentTime > currentDay.workStarts.date) {
+  if (currentDay.workStarts[0] && !currentDay.clockedIn[0] && currentTime > currentDay.workStarts[0]) {
     // set day status to late
-    return (currentDay.workStarts.date - currentTime) + ' Late';
+    return (currentDay.workStarts[0] - currentTime) + ' Late';
   }
-  if (currentDay.startedBreak.dates && !currentDay.endedBreak.dates) {
-    return 'On break';
-  }
-  if (currentDay.clockedIn.dates && !currentDay.clockedOut.dates) {
-    return 'Working';
-  }
-  if (currentDay.clockedIn.dates && currentDay.clockedOut.dates) {
-    return 'Done working';
-  }
-  return 'None';
-}
 
-
-function calculateHrsWorked(currentDay) {
-  if (!currentDay) return new Date('2023-07-28T00:00:00.000+02:00');
-  const now = new Date();
-  if (currentDay.clockedIn.dates) {
-    const WorkStarted = new Date(currentDay.clockedIn.dates);
-    WorkStarted.setSeconds(0);
-    if (currentDay.clockedOut.dates) {
-      const WorkEnded = new Date(currentDay.clockedOut.dates);
-      return getDifferenceAsDate(WorkEnded, WorkStarted);
-    } else {
-      return getDifferenceAsDate(now, WorkStarted);
+  for (let i = 0; i < currentDay.clockedIn.length; i++) {
+    if (currentDay.startedBreak[i] && !currentDay.endedBreak[i]) {
+      return 'On break';
+    }
+    if (currentDay.clockedIn[i] && !currentDay.clockedOut[i]) {
+      return 'Working';
+    }
+    if (currentDay.clockedIn[i] && currentDay.clockedOut[i]) {
+      result = 'Done working';
     }
   }
-  return new Date('2023-07-28T00:00:00.000+02:00');
+  return result;
 }
 
-function getDifferenceAsDate(date1, date2) {
-  const differenceInMilliseconds = Math.abs(date1 - date2);
-  const differenceDate = new Date(differenceInMilliseconds - (1000 * 60 * 60 * 2));
-  return differenceDate;
+
+function calculateWorked(day) {
+  let worked = 0;
+  if (!day) return worked;
+  const now = new Date();
+  for (let i = 0; i < day.clockedIn.length; i++) {
+    if (day.clockedIn[i]) {
+      const WorkStarted = new Date(day.clockedIn[i]);
+      WorkStarted.setSeconds(0);
+      if (day.clockedOut[i]) {
+        const WorkEnded = new Date(day.clockedOut[i]);
+        worked += WorkEnded - WorkStarted;
+      } else {
+        worked += now - WorkStarted;
+      }
+    }
+  }
+  return worked;
 }
 
-function dateToString(date) {
+function mSecondsDateToString(milliseconds) {
+  const date = new Date(milliseconds);
+  date.setMinutes(date.getMinutes() + date.getTimezoneOffset())
   const hours = date.getHours();
   const minutes = date.getMinutes();
   const formattedHours = hours < 10 ? `0${hours}` : hours;

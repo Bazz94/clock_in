@@ -27,19 +27,15 @@ router.get('/', authToken, async (req, res) => {
     if (!sameDay(date, currentDayDate, user.timezone)) {
       // Push currentDay to days and init currentDay
       console.log('New Day');
-      const newCurrentDay = determineNewCurrentDay(user.schedule, user.timezone);
-      const newStatus = user.currentDay.status === 'current' 
-        ? determineStatus(user.currentDay, user.schedule, user.timezone) 
-        : user.currentDay.status;
+      const newCurrentDay = determineNewCurrentDay(date ,user.schedule, user.timezone);
       
+      // TODO: calculate last 6 days working hrs (exclude currentDay)
+      let newDays = createNewDays(user.currentDay, user.schedule, user.timezone);
+
       const query = { _id: new ObjectId(uid) };
       const updates = {
         $push: {
-          days: {
-            status: newStatus,
-            date: user.currentDay.date,
-            worked: user.currentDay.worked,
-          }
+          days: { $each: newDays }
         },
         $set: {
           currentDay: newCurrentDay
@@ -82,33 +78,21 @@ function sameDay(date1, date2, timezone) {
 }
 
 
-function determineNewCurrentDay(schedule, timezone) {
+function determineNewCurrentDay(date ,schedule, timezone) {
   const initCurrentDay = {
     status: 'current',
-    date: new Date(),
+    date: date,
     worked: 0,
-    workStarts: {
-      date: null
-    },
-    workEnds: {
-      date: null
-    },
-    clockedIn: {
-      dates: null
-    },
-    clockedOut: {
-      dates: null
-    },
-    startedBreak: {
-      dates: null
-    },
-    endedBreak: {
-      dates: null
-    },
+    workStarts: [],
+    workEnds: [],
+    clockedIn: [],
+    clockedOut: [],
+    startedBreak: [],
+    endedBreak: [],
   };
   
-  const date = new Date();
-  date.setMinutes(date.getMinutes() - timezone);
+  const newDate = new Date(date);
+  newDate.setMinutes(newDate.getMinutes() - timezone);
   
   // No schedule
   if (schedule.workdays.length === 0) {
@@ -116,17 +100,17 @@ function determineNewCurrentDay(schedule, timezone) {
   }
 
   // Not working today
-  const isLeaveDay = schedule.scheduledLeave.find(leaveDate => sameDay(new Date(leaveDate), date, timezone));
+  const isLeaveDay = schedule.scheduledLeave.find(leaveDate => sameDay(new Date(leaveDate), newDate, timezone));
   if (isLeaveDay) {
     return initCurrentDay;
   }
 
-  const isSickDay = schedule.scheduledSick.find(sickDate => sameDay(new Date(sickDate), date, timezone));
+  const isSickDay = schedule.scheduledSick.find(sickDate => sameDay(new Date(sickDate), newDate, timezone));
   if (isSickDay) {
     return initCurrentDay;
   }
 
-  if (schedule.workdays.find(day => day === date.getDay()) == null) {
+  if (schedule.workdays.find(day => day === newDate.getDay()) == null) {
     return initCurrentDay;
   } 
 
@@ -134,33 +118,45 @@ function determineNewCurrentDay(schedule, timezone) {
   const workStarts = getCurrentDateWithTimeOf(new Date(schedule.workStarts), timezone);
   const workEnds = getCurrentDateWithTimeOf(new Date(schedule.workEnds), timezone);
 
-  console.log(workStarts, workEnds);
-
   // Return new currentDay
   return {
     status: 'current',
-    date: new Date(),
+    date: date,
     worked: 0,
-    workStarts: {
-      date: workStarts
-    },
-    workEnds: {
-      date: workEnds
-    },
-    clockedIn: {
-      dates: null
-    },
-    clockedOut: {
-      dates: null
-    },
-    startedBreak: {
-      dates: null
-    },
-    endedBreak: {
-      dates: null
-    },
+    workStarts: [workStarts],
+    workEnds: [workEnds],
+    clockedIn: [],
+    clockedOut: [],
+    startedBreak: [],
+    endedBreak: [],
   }
 }
+
+
+function createNewDays(day, schedule, timezone) {
+  const list = [];
+  const currentDate = new Date();
+  const newStatus = determineStatus(day, schedule, timezone);
+  const newWorked = calculateWorked(day);
+  const newDay = { status: newStatus, date: day.date, worked: newWorked };
+  const lastDay = new Date(day.date)
+  let dayDifference = getDifferenceInDays(currentDate, lastDay);
+  console.log(dayDifference);
+  dayDifference -= 1;
+  for (let i = 1; i <= dayDifference; i++) {
+    let date = new Date();
+    date.setDate(date.getDate() - i);
+    const oldCurrentDay = determineNewCurrentDay(date, schedule, timezone);
+    const oldStatus = determineStatus(oldCurrentDay, schedule, timezone);
+    const oldWorked = calculateWorked(oldCurrentDay);
+    let oldDay = { status: oldStatus, date: date, worked: oldWorked };
+    console.log(oldDay);
+    list.push(oldDay);
+  }
+  list.push(newDay);
+  return list;
+}
+
 
 function determineStatus(day, schedule, timezone) {
   const date = new Date();
@@ -173,23 +169,24 @@ function determineStatus(day, schedule, timezone) {
   if (schedule.workdays.find(day => day === date.getDay() == null)) return 'offDay';
 
   // No schedule
-  if (!day.workStarts.date) {
-    if (day.clockedIn.dates && day.clockedOut.dates) return 'perfect';
+  if (!day.workStarts[0]) {
+    if (day.clockedIn[0] && day.clockedOut[0]) return 'perfect';
     return 'none';
   }
 
   // Working today 
-  if (!day.clockedIn.dates) return 'absent';
-  if (day.workStarts.date < day.clockedIn.dates) return 'late';
-  if (!day.clockedOut.dates) return 'none';
-  const earliestClockOut = new Date(day.workEnds.date);
+  if (!day.clockedIn[0]) return 'absent';
+  if (day.workStarts[0] < day.clockedIn[0]) return 'late';
+  if (!day.clockedOut[0]) return 'none';
+  const earliestClockOut = new Date(day.workEnds[0]);
   earliestClockOut.setMinutes(earliestClockOut.getMinutes() - 15);
-  if (earliestClockOut > day.clockedOut.dates) return 'halfDay';
-  const latestClockOut = new Date(day.workEnds.date);
+  if (earliestClockOut > day.clockedOut[0]) return 'halfDay';
+  const latestClockOut = new Date(day.workEnds[0]);
   latestClockOut.setMinutes(latestClockOut.getMinutes() + 15);
-  if (latestClockOut < day.clockedOut.dates) return 'overtime'; // temp default
+  if (latestClockOut < day.clockedOut[0]) return 'overtime'; // temp default
   return 'perfect'; 
 }
+
 
 function getCurrentDateWithTimeOf(date, timezone) {
   // adjust timezone
@@ -207,3 +204,28 @@ function getCurrentDateWithTimeOf(date, timezone) {
 }
 
 
+function calculateWorked(day) {
+  let worked = 0;
+  if (!day) return worked;
+  const now = new Date();
+  for (let i = 0; i < day.clockedIn.length; i++) {
+    if (day.clockedIn[i]) {
+      const WorkStarted = new Date(day.clockedIn[i]);
+      WorkStarted.setSeconds(0);
+      if (day.clockedOut[i]) {
+        const WorkEnded = new Date(day.clockedOut[i]);
+        worked += WorkEnded - WorkStarted;
+      } else {
+        worked += now - WorkStarted;
+      }
+    }
+  }
+  return worked;
+}
+
+
+function getDifferenceInDays(date1, date2) {
+  const diffInMilliseconds = Math.abs(date1 - date2);
+  const daysDifference = Math.floor(diffInMilliseconds / (24 * 60 * 60 * 1000));
+  return daysDifference;
+}

@@ -125,24 +125,12 @@ router.post('/', async (req, res) => {
         status: 'current',
         date: date,
         worked: 0,
-        workStarts: {
-          date: null
-        },
-        workEnds: {
-          date: null
-        },
-        clockedIn: {
-          dates: null
-        },
-        clockedOut: {
-          dates: null
-        },
-        startedBreak: {
-          dates: null
-        },
-        endedBreak: {
-          dates: null
-        },
+        workStarts: [],
+        workEnds: [],
+        clockedIn: [],
+        clockedOut: [],
+        startedBreak: [],
+        endedBreak: [],
       },
       days: [],
     }

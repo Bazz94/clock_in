@@ -60,26 +60,29 @@ const EmptyTimeLine = ({dimensions}) => {
 }
 
 const CurrentTimeDot = ({day, dimensions, time}) => {
+  console.log('rerender dot');
   const xMid = dimensions.w / 2;
   const date = new Date();
   const currentTimePoint = { x: xMid, y: timeToYValue(date, dimensions.h) };
+  const xOffset = getXOffset(day);
+  console.log(xOffset);
   return (
     <Group>
       <Circle x={currentTimePoint.x} y={currentTimePoint.y} radius={6} fill="#eee" />
-      <Text x={currentTimePoint.x - 70 - getXOffset(day)} y={currentTimePoint.y-6} text={time} fontSize={15} fill='#eee' align="right" width={50}/>
+      <Text x={currentTimePoint.x - 70 - xOffset} y={currentTimePoint.y-6} text={time} fontSize={15} fill='#eee' align="right" width={50}/>
     </Group>
   )
 }
 
 const Lines = ({ day, dimensions }) => {
   let clockLine = { color: 'green', lines: calculateLinesFromDates(
-    dimensions, day['clockedIn'].dates, day['clockedOut'].dates )};
+    dimensions, day.clockedIn[0], day.clockedOut[0] )};
   let lateLine = { color: 'red', lines: calculateLinesFromDates(
-    dimensions, day['workStarts'].date, day['clockedIn'].dates, false, day['workEnds'].date)};
+    dimensions, day.workStarts[0], day.clockedIn[0], false, day.workEnds[0])};
   let workLine = { color: 'blue', lines: calculateLinesFromDates(
-    dimensions, day['workStarts'].date, day['workEnds'].date, true)};
+    dimensions, day.workStarts[0], day.workEnds[0], true)};
   let breakLine = { color: 'yellow', lines: calculateLinesFromDates(
-    dimensions, day['startedBreak'].dates, day['endedBreak'].dates)};
+    dimensions, day.startedBreak[0], day.endedBreak[0])};
   const shapes = [ lateLine, workLine, clockLine, breakLine];
   return (
     <Group>
@@ -112,7 +115,7 @@ const Lines = ({ day, dimensions }) => {
   )
 }
 
-// late:  startWork  clock-in
+
 function calculateLinesFromDates(dimensions, start, end, isWork, isLateLine) {
   const startDate = start ? new Date(start) : null; 
   const endDate = end ? new Date(end) : null; 
@@ -162,50 +165,55 @@ function calculateLinesFromDates(dimensions, start, end, isWork, isLateLine) {
   return [startMarker, line, endMarker];
 }
 
+
 function timeToYValue(date, canvasHeight) {
   let totalMinutes = date.getMinutes() + (date.getHours() * 60);
   const timeY = (totalMinutes / 1440) * (canvasHeight - 12);
   return timeY + 6;
 }
 
+
 function getMarkerText(day, markerType, color) {
+
   const options = ['en-Gb', { hour: '2-digit', minute: '2-digit', hour12: false }];
   // clock-in and out
   if (color === 'green') {
     if (markerType === 'start') {
-      const date = new Date(day.clockedIn.dates);
+      const date = new Date(day.clockedIn[0]);
       return date.toLocaleTimeString(...options);
     }
     if (markerType === 'end') {
-      const date = new Date(day.clockedOut.dates);
+      const date = new Date(day.clockedOut[0]);
       return date.toLocaleTimeString(...options);
     }
   }
   // break start and stop
   if (color === 'yellow') {
     if (markerType === 'start') {
-      const date = new Date(day.startedBreak.dates);
+      const date = new Date(day.startedBreak[0]);
       return date.toLocaleTimeString(...options);
     }
     if (markerType === 'end') {
-      const date = new Date(day.endedBreak.dates);
+      const date = new Date(day.endedBreak[0]);
       return date.toLocaleTimeString(...options);
     }
   }
   // work starts and ends
   if (color === 'blue') {
     if (markerType === 'start') {
-      const date = new Date(day.workStarts.date);
+      const date = new Date(day.workStarts[0]);
       return date.toLocaleTimeString(...options);
     }
     if (markerType === 'end') {
-      const date = new Date(day.workEnds.date);
+      const date = new Date(day.workEnds[0]);
       return date.toLocaleTimeString(...options);
     }
   }
 }
 
+
 function getXOffset(day) {
+  console.log(day);
   let canGoToRight = true;
   let date = new Date();
   let before= new Date();
@@ -216,33 +224,33 @@ function getXOffset(day) {
   before = before.toISOString();
   after = after.toISOString()
 
-  if (day['workStarts'].date) {
-    if (day['workStarts'].date < after && day['workStarts'].date > before) {
+  if (day.workStarts[0]) {
+    if (day.workStarts[0] < after && day.workStarts[0] > before) {
       canGoToRight = false;
     }
   }
-  if (day['workEnds'].date) {
-    if (day['workEnds'].date < after && day['workEnds'].date > before) {
+  if (day.workEnds[0]) {
+    if (day.workEnds[0] < after && day.workEnds[0] > before) {
       canGoToRight = false;
     }
   }
-  if (day['clockedIn'].dates) {
-    if (day['clockedIn'].dates < after && day['clockedIn'].dates > before) {
+  if (day.clockedIn[0]) {
+    if (day.clockedIn[0] < after && day.clockedIn[0] > before) {
       return canGoToRight ? -80 : 45;
     }
   }
-  if (day['clockedOut'].dates) {
-    if (day['clockedOut'].dates < after && day['clockedOut'].dates > before) {
+  if (day.clockedOut[0]) {
+    if (day.clockedOut[0] < after && day.clockedOut[0] > before) {
       return canGoToRight ? -80 : 45;
     }
   }
-  if (day['startedBreak'].dates) {
-    if (day['startedBreak'].dates < after && day['startedBreak'].dates > before) {
+  if (day.startedBreak[0]) {
+    if (day.startedBreak[0] < after && day.startedBreak[0] > before) {
       return canGoToRight ? -80 : 45;
     }
   }
-  if (day['endedBreak'].dates) {
-    if (day['endedBreak'].dates < after && day['endedBreak'].dates > before) {
+  if (day.endedBreak[0]) {
+    if (day.endedBreak[0] < after && day.endedBreak[0] > before) {
       return canGoToRight ? -80 : 45;
     }
   }
