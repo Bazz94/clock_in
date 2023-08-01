@@ -28,9 +28,8 @@ router.get('/', authToken, async (req, res) => {
       // Push currentDay to days and init currentDay
       console.log('New Day');
       const newCurrentDay = determineNewCurrentDay(date ,user.schedule, user.timezone);
-      
-      // TODO: calculate last 6 days working hrs (exclude currentDay)
       let newDays = createNewDays(user.currentDay, user.schedule, user.timezone);
+      const worked7 = calculateWorked7(newDays, user.days, user.timezone);
 
       const query = { _id: new ObjectId(uid) };
       const updates = {
@@ -38,7 +37,8 @@ router.get('/', authToken, async (req, res) => {
           days: { $each: newDays }
         },
         $set: {
-          currentDay: newCurrentDay
+          currentDay: newCurrentDay,
+          worked7: worked7,
         },
       };
       const options = {
@@ -141,7 +141,6 @@ function createNewDays(day, schedule, timezone) {
   const newDay = { status: newStatus, date: day.date, worked: newWorked };
   const lastDay = new Date(day.date)
   let dayDifference = getDifferenceInDays(currentDate, lastDay);
-  console.log(dayDifference);
   dayDifference -= 1;
   for (let i = 1; i <= dayDifference; i++) {
     let date = new Date();
@@ -150,7 +149,6 @@ function createNewDays(day, schedule, timezone) {
     const oldStatus = determineStatus(oldCurrentDay, schedule, timezone);
     const oldWorked = calculateWorked(oldCurrentDay);
     let oldDay = { status: oldStatus, date: date, worked: oldWorked };
-    console.log(oldDay);
     list.push(oldDay);
   }
   list.push(newDay);
@@ -163,10 +161,10 @@ function determineStatus(day, schedule, timezone) {
  
   // Not working today
   const isLeaveDay = schedule.scheduledLeave.find(leaveDate => sameDay(new Date(leaveDate), date, timezone));
-  if (isLeaveDay) return 'leave';
+  if (isLeaveDay) return 'perfect';
   const isSickDay = schedule.scheduledSick.find(sickDate => sameDay(new Date(sickDate), date, timezone));
-  if (isSickDay) return 'sick';
-  if (schedule.workdays.find(day => day === date.getDay() == null)) return 'offDay';
+  if (isSickDay) return 'perfect';
+  if (schedule.workdays.find(day => day === date.getDay() == null)) return 'perfect';
 
   // No schedule
   if (!day.workStarts[0]) {
@@ -176,14 +174,11 @@ function determineStatus(day, schedule, timezone) {
 
   // Working today 
   if (!day.clockedIn[0]) return 'absent';
-  if (day.workStarts[0] < day.clockedIn[0]) return 'late';
-  if (!day.clockedOut[0]) return 'none';
+  if (day.workStarts[0] < day.clockedIn[0]) return 'present';
+  if (!day.clockedOut[0]) return 'present';
   const earliestClockOut = new Date(day.workEnds[0]);
   earliestClockOut.setMinutes(earliestClockOut.getMinutes() - 15);
-  if (earliestClockOut > day.clockedOut[0]) return 'halfDay';
-  const latestClockOut = new Date(day.workEnds[0]);
-  latestClockOut.setMinutes(latestClockOut.getMinutes() + 15);
-  if (latestClockOut < day.clockedOut[0]) return 'overtime'; // temp default
+  if (earliestClockOut > day.clockedOut[0]) return 'present';
   return 'perfect'; 
 }
 
@@ -228,4 +223,30 @@ function getDifferenceInDays(date1, date2) {
   const diffInMilliseconds = Math.abs(date1 - date2);
   const daysDifference = Math.floor(diffInMilliseconds / (24 * 60 * 60 * 1000));
   return daysDifference;
+}
+
+function calculateWorked7(newDays, days) {
+  let worked7 = 0;
+  const limit = new Date();
+  limit.setDate(limit.getDate() - 8);
+  limit.setHours(0);
+  limit.setMinutes(0);
+  let count = 0;
+  let flag = true;
+  while (flag) {
+    if (days[count]) {
+      if (new Date(days[count].date) > limit) {
+        worked7 += days[count].worked;
+        count++;
+      } else {
+        flag = false;
+      }
+    } else {
+      flag = false;
+    }
+  }
+
+  worked7 += newDays[0].worked;
+ 
+  return worked7;
 }

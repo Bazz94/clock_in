@@ -20,18 +20,20 @@ html {
 }
 
 /* Calender heatmap */
-
+.react-calendar-heatmap .color-scale-0 {
+  fill: transparent;
+}
 .react-calendar-heatmap .color-scale-1 {
-  fill: blue;
+  fill: black;
 }
 .react-calendar-heatmap .color-scale-2 {
-  fill: yellow;
+  fill: green;
 }
 .react-calendar-heatmap .color-scale-3 {
-  fill: red;
+  fill: yellow;
 }
 .react-calendar-heatmap .color-scale-4 {
-  fill: green;
+  fill: red;
 }
 
 .react-calendar-heatmap-weekday-label {

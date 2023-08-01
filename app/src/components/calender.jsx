@@ -2,29 +2,19 @@ import { useEffect, useState } from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
 
 /*
-  none: black
-  1 : Current day : blue
-  2 : late        : yellow
-  3 : absent      : red
-  4 : perfect     : green
-  5 : overtime    : dark green
-  6 : half day    : light green
-  7 : sick        : grey
-  8 : leave       : purple
-  9 : off day (weekend) : neutral
-  10 : misused (never clocked-out) : yellow
+  0 : After today       : transparent
+  1 : No data           : Black
+  2 : Perfect day       : Green
+  3 : late or half day  : yellow
+  4 : absent            : red
 */
 
 const typeToCount = {
-  current: 1,
-  late: 2,
-  absent: 3,
-  perfect: 4,
-  halfDay: 6,
-  sick: 7,
-  leave: 8,
-  offDay: 9,
-  misused: 10,
+  future: 0,
+  none: 1,
+  perfect: 2,
+  present: 3,
+  absent: 4,
 }
 
 function Calendar({user}) {
@@ -64,8 +54,8 @@ function Calendar({user}) {
           setShowTooltip(false)
         }}
         classForValue={(value) => {
-          if (!value) {
-            return 'color-empty';
+          if (value == null) {
+            return `color-scale-0`;
           }
           return `color-scale-${value.count}`;
         }}
@@ -86,8 +76,10 @@ export default Calendar;
 function getFromAndToDates() {
   let to, from;
   const date = new Date();
+  date.setDate(date.getDate() + date.getDay());
   to = date.toISOString().split('T')[0];
-  date.setDate(date.getDate() - 182 );
+  date.setDate(date.getDate() - 189 + date.getDay());
+
   from = date.toISOString().split('T')[0];
   return {from: from, to: to}
 }
@@ -96,15 +88,16 @@ function getFromAndToDates() {
 function populateEmptyDays(currentDay, days) {
   const currentDate = new Date(currentDay.date);
   const strCurrentDate = currentDate.toISOString().split('T')[0];
-  const newCurrentDay = { date: strCurrentDate, count: typeToCount[currentDay.status] }
+  const newCurrentDay = { date: strCurrentDate, count: 1 }
   const newData = [];
   const date = new Date();
+  const today = new Date();
   let index = 0;
   date.setDate(date.getDate() + 1);
-  for (let i = 0; i < 181; i++) {
+  for (let i = 0; i < 189; i++) {
     date.setDate(date.getDate() - 1);
     const strDate = date.toISOString().split('T')[0];
-    let day = { date: strDate, count: 0 };
+    let day = { date: strDate, count: date > today ? 0 : 1 };
     if (index < days.length) {
       const dateObj = new Date(days[index].date);
       if (dateObj.toISOString().split('T')[0] === strDate) {

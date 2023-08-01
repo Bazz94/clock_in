@@ -82,8 +82,6 @@ export default function Home() {
   }, [schedule]);
 
   
-  
-
   return isLoading ? (<Loading />) : (
     <div className="flex flex-col h-screen">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>

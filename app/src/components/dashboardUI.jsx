@@ -9,14 +9,18 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
   const [breakStartButtonText, setBreakStartButtonText] = useState('Start break');
   const [working, setWorking] = useState(false);
   const [onBreak, setOnBreak] = useState(false);
-  let worked = useRef(0);
-
+  const [worked, setWorked] = useState(0);
+  console.log('worked: ', worked)
   useEffect(() => {
-    worked.current = calculateWorked(currentDay);
+    setWorked(calculateWorked(currentDay));
+    const now = new Date();
     setTimeout(() => {
-      console.log('tick');
-      worked.current = calculateWorked(currentDay);
-    },1000 * 60);
+      setWorked(calculateWorked(currentDay));
+      setInterval(() => {
+        console.log('tick');
+        setWorked(calculateWorked(currentDay));
+      },1000 * 60);
+    }, (60 - now.getSeconds()) * 1000);
   }, []);
 
   useEffect(() => {
@@ -104,21 +108,13 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
       <div className='flex-1 m-2 mt-0 border shadow-md sm:m-4 sm:mt-0 border-neutral-800 rounded-xl'>
         <div className="flex flex-col items-center justify-center w-full h-full p-2">
           <p className="p-1 text-lg">
-            Work day</p>
+            Today</p>
           <p className="pb-4 text-2xl">
-            {worked.current ? mSecondsDateToString(worked.current) : '00:00'}</p>
+            {worked && mSecondsDateToString(worked)}</p>
           <p className="pb-1 text-lg">
-            Work Week</p>
+            Last 7 Days</p>
           <p className="pb-4 text-2xl">
-            {user.worked7}</p>
-          <p className="pb-1 text-lg">
-            Perfect Streak</p>
-          <p className="pb-4 text-2xl">
-            {user.streak}</p>
-          <p className="pb-1 text-lg">
-            Consistency</p>
-          <p className="pb-2 text-2xl">
-            {user.consistency}</p>
+            {user && mSecondsDateToString(user.worked7)}</p>
         </div>
       </div>
     </div>

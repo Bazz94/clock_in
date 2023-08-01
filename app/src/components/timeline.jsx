@@ -60,12 +60,10 @@ const EmptyTimeLine = ({dimensions}) => {
 }
 
 const CurrentTimeDot = ({day, dimensions, time}) => {
-  console.log('rerender dot');
   const xMid = dimensions.w / 2;
   const date = new Date();
   const currentTimePoint = { x: xMid, y: timeToYValue(date, dimensions.h) };
   const xOffset = getXOffset(day);
-  console.log(xOffset);
   return (
     <Group>
       <Circle x={currentTimePoint.x} y={currentTimePoint.y} radius={6} fill="#eee" />
@@ -75,15 +73,20 @@ const CurrentTimeDot = ({day, dimensions, time}) => {
 }
 
 const Lines = ({ day, dimensions }) => {
-  let clockLine = { color: 'green', lines: calculateLinesFromDates(
-    dimensions, day.clockedIn[0], day.clockedOut[0] )};
-  let lateLine = { color: 'red', lines: calculateLinesFromDates(
-    dimensions, day.workStarts[0], day.clockedIn[0], false, day.workEnds[0])};
-  let workLine = { color: 'blue', lines: calculateLinesFromDates(
-    dimensions, day.workStarts[0], day.workEnds[0], true)};
-  let breakLine = { color: 'yellow', lines: calculateLinesFromDates(
-    dimensions, day.startedBreak[0], day.endedBreak[0])};
-  const shapes = [ lateLine, workLine, clockLine, breakLine];
+  let shapes = [];
+  for (let i = 0; i < day.clockedIn.length; i++) {
+
+    let clockLine = { color: 'green', lines: calculateLinesFromDates(
+      dimensions, day.clockedIn[i], day.clockedOut[i] )};
+    let lateLine = { color: 'red', lines: calculateLinesFromDates(
+      dimensions, day.workStarts[i], day.clockedIn[i], false, day.workEnds[i])};
+    let workLine = { color: 'blue', lines: calculateLinesFromDates(
+      dimensions, day.workStarts[i], day.workEnds[i], true)};
+    let breakLine = { color: 'yellow', lines: calculateLinesFromDates(
+      dimensions, day.startedBreak[i], day.endedBreak[i])};
+    shapes = [ ...shapes ,lateLine, workLine, clockLine, breakLine];
+  }
+
   return (
     <Group>
       {shapes.map((shape, index) => (
@@ -213,7 +216,6 @@ function getMarkerText(day, markerType, color) {
 
 
 function getXOffset(day) {
-  console.log(day);
   let canGoToRight = true;
   let date = new Date();
   let before= new Date();

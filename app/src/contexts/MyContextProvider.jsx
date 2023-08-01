@@ -25,9 +25,13 @@ function MyContextProvider({ children }) {
 
   useEffect(() => {
     setTime(getTime());
-    setInterval(() => {
+    const date = new Date();
+    setTimeout(() => {
       setTime(getTime());
-    }, 60 * 1000);
+      setInterval(() => {
+        setTime(getTime());
+      }, 60 * 1000);
+    }, (60 - date.getSeconds()) * 1000);
   }, []);
 
 

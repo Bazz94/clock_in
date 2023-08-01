@@ -108,7 +108,6 @@ router.post('/', async (req, res) => {
       timezone: timezone,
       startedDate: date,
       worked7: 0,
-      worked7goal: 0,
       streak: 0,
       consistency: 100, // % of not bad days
       schedule: {
