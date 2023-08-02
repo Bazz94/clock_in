@@ -87,36 +87,7 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
   
   return (
     <div className='flex flex-row flex-wrap sm:flex-1 min-h-[400px]'>
-      <div className='flex-1 m-2 mt-0 border shadow-md sm:m-4 sm:mt-0 border-neutral-800 rounded-xl'>
-        <div className="flex flex-col items-center justify-center w-full h-full p-2">
-          <p className="p-3 text-lg">
-            Current Event</p>
-          <p className="pb-8 text-2xl">
-            {currentEvent && currentEvent}</p>
-          <button className="p-2 m-1 rounded-3xl w-28 hover:scale-105 bg-neutral-500" 
-            onClick={handleClockIn}
-          >
-            {clockInButtonText}
-          </button>
-          {working && <button className="p-2 m-1 rounded-3xl w-28 hover:scale-105 bg-neutral-500"
-            onClick={handleBreak}
-          >
-            {breakStartButtonText}
-          </button>}
-        </div>
-      </div>
-      <div className='flex-1 m-2 mt-0 border shadow-md sm:m-4 sm:mt-0 border-neutral-800 rounded-xl'>
-        <div className="flex flex-col items-center justify-center w-full h-full p-2">
-          <p className="p-1 text-lg">
-            Today</p>
-          <p className="pb-4 text-2xl">
-            {worked && mSecondsDateToString(worked)}</p>
-          <p className="pb-1 text-lg">
-            Last 7 Days</p>
-          <p className="pb-4 text-2xl">
-            {user && mSecondsDateToString(user.worked7)}</p>
-        </div>
-      </div>
+      
     </div>
   )
 }

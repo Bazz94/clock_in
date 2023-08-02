@@ -78,7 +78,7 @@ function getFromAndToDates() {
   const date = new Date();
   date.setDate(date.getDate() + date.getDay());
   to = date.toISOString().split('T')[0];
-  date.setDate(date.getDate() - 189 + date.getDay());
+  date.setDate(date.getDate() - 364 + date.getDay());
 
   from = date.toISOString().split('T')[0];
   return {from: from, to: to}
@@ -94,7 +94,7 @@ function populateEmptyDays(currentDay, days) {
   const today = new Date();
   let index = 0;
   date.setDate(date.getDate() + 1);
-  for (let i = 0; i < 189; i++) {
+  for (let i = 0; i < 364; i++) {
     date.setDate(date.getDate() - 1);
     const strDate = date.toISOString().split('T')[0];
     let day = { date: strDate, count: date > today ? 0 : 1 };

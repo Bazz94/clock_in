@@ -60,7 +60,6 @@ export default function Home() {
     }).catch(err => {
       setError({message: err.message, redirect: true});
     }).finally(() => setIsLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -83,7 +82,7 @@ export default function Home() {
 
   
   return isLoading ? (<Loading />) : (
-    <div className="flex flex-col h-screen bg-black">
+    <div className="h-screen bg-black">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
       {user && <NavBar 
         user={user} 
@@ -92,32 +91,33 @@ export default function Home() {
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
       />}
-      <section className='flex flex-col items-center justify-center h-[90%] w-screen' >
-        <div className='flex flex-row justify-center w-full h-full p-0 sm:p-5 md:w-5/6 lg:w-full xl:w-5/6 max-w-7xl min-w-[16rem]'>
-          <div className='flex-col hidden w-1/3 lg:flex'>
-            <div className='flex items-center justify-center h-16'>
-              <h1 className='text-xl'>{date}</h1>
-            </div>
-            <div className='flex items-center justify-center flex-1 mx-4 border shadow-md border-neutral-800 rounded-xl'>
-              {user && <Timeline day={currentDay}/>}
-            </div>
+      {currentTab === 'home' && 
+        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
+          <div className='w-5/6 p-2  h-1/3 max-w-7xl min-w-[350px] '>
+            {user && <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch}/>}
           </div>
-          <div className='flex flex-col w-full lg:w-2/3 min-w-[16rem] justify-center'>
-            <div className='flex items-center justify-center h-16 pr-6 ml-6'>
-              <h1 className='text-xl'>Welcome</h1>
-            </div>
-            {user && (currentTab === 'home' 
-              ? <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch} />  
-              : currentTab === 'schedule'
-                ? <ScheduleUI schedule={schedule} scheduleDispatch={scheduleDispatch}/> 
-                : <LeaveUI schedule={schedule} scheduleDispatch={scheduleDispatch} />)
-            }
-            <div className='m-2 mb-2 border shadow-md sm:m-4 sm:mb-0 sm:h-1/3 border-neutral-800 rounded-xl h-fit'>
-              {user && <Calendar user={user} />}
-            </div>
+          <div className='w-5/6 p-2  h-1/3 max-w-7xl min-w-[350px] '>
+            {user && <Timeline day={currentDay}/>}
           </div>
-        </div>
-      </section>
+          <div className='w-5/6 p-2  h-1/3 max-w-7xl min-w-[350px] '>
+            {user && <Calendar user={user} />}
+          </div>
+        </section>}
+      {currentTab === 'schedule' &&
+        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
+          <div className='w-5/6 p-2  h-1/2 max-w-7xl min-w-[350px] '>
+
+          </div>
+          <div className='w-5/6 p-2  h-1/2 max-w-7xl min-w-[350px] '>
+
+          </div>
+        </section>}
+      {currentTab === 'social' &&
+        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
+          <div className='w-full p-2  h-full max-w-7xl min-w-[350px] '>
+
+          </div>
+        </section>}
       <Popup
         error={error}
         setError={setError}
@@ -126,7 +126,6 @@ export default function Home() {
     </div>
   )
 }
-
 
 
 
