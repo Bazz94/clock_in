@@ -5,7 +5,7 @@ function Clock() {
   const { time} = useContext(MyContext);
 
   return (
-    <span className='flex items-center justify-center w-full h-full p-5 text-xl'>
+    <span className='flex items-center justify-end w-full h-full p-5 pr-12 text-xl'>
       {time}
     </span>
   )

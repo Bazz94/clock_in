@@ -24,9 +24,9 @@ function NavBar({ user, openSideDrawer, setOpenSideDrawer, currentTab, setCurren
   }
 
   return (
-    <nav className='flex justify-center w-screen h-20 bg-neutral-800'>
-      <div className='flex content-center flex-1 max-w-7xl'>
-        <button className='w-1/3 p-5 text-xl hover:scale-105 '
+    <nav className='flex justify-center w-screen h-20 bg-black'>
+      <div className='flex flex-1 max-w-7xl'>
+        <button className='w-1/3 p-5 pl-12 text-xl text-left hover:scale-105 '
           onClick={clickUsername}>
           {user.name}
         </button>

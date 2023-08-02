@@ -83,7 +83,7 @@ export default function Home() {
 
   
   return isLoading ? (<Loading />) : (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-black">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
       {user && <NavBar 
         user={user} 
