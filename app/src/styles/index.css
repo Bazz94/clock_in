@@ -2,7 +2,7 @@
   font-family: Inter, Arial, sans-serif;
   font-weight: 400;
 
-  color: rgba(255, 255, 255, 0.87);
+  color: white;
   background-color:#171717;
   width: 100vw;
   height: 100vh;
@@ -20,20 +20,24 @@ html {
 }
 
 /* Calender heatmap */
+.react-calendar-heatmap {
+  font-size: 1rem !important;
+}
 .react-calendar-heatmap .color-scale-0 {
   fill: transparent;
 }
 .react-calendar-heatmap .color-scale-1 {
-  fill: black;
+  fill: #222222;
+  opacity: 0.5;
 }
 .react-calendar-heatmap .color-scale-2 {
-  fill: green;
+  fill: #22FFBC;
 }
 .react-calendar-heatmap .color-scale-3 {
-  fill: yellow;
+  fill: #FFFF22;
 }
 .react-calendar-heatmap .color-scale-4 {
-  fill: red;
+  fill: #FF2265;
 }
 
 .react-calendar-heatmap-weekday-label {

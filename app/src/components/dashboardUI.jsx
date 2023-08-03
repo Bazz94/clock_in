@@ -10,14 +10,12 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
   const [working, setWorking] = useState(false);
   const [onBreak, setOnBreak] = useState(false);
   const [worked, setWorked] = useState(0);
-  console.log('worked: ', worked)
   useEffect(() => {
     setWorked(calculateWorked(currentDay));
     const now = new Date();
     setTimeout(() => {
       setWorked(calculateWorked(currentDay));
       setInterval(() => {
-        console.log('tick');
         setWorked(calculateWorked(currentDay));
       },1000 * 60);
     }, (60 - now.getSeconds()) * 1000);

@@ -93,28 +93,28 @@ export default function Home() {
       />}
       {currentTab === 'home' && 
         <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
-          <div className='w-5/6 p-2  h-1/3 max-w-7xl min-w-[350px] '>
+          <div className='w-5/6 p-2  h-1/3 space-y-5 max-w-6xl border border-neutral-400 rounded-lg min-w-[350px] '>
             {user && <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch}/>}
           </div>
-          <div className='w-5/6 p-2  h-1/3 max-w-7xl min-w-[350px] '>
+          <div className='w-5/6 p-2  h-1/3 max-w-6xl border border-neutral-400 rounded-lg min-w-[350px] '>
             {user && <Timeline day={currentDay}/>}
           </div>
-          <div className='w-5/6 p-2  h-1/3 max-w-7xl min-w-[350px] '>
+          <div className='w-5/6 p-2  h-1/3 max-w-6xl border border-neutral-400 rounded-lg min-w-[350px] '>
             {user && <Calendar user={user} />}
           </div>
         </section>}
       {currentTab === 'schedule' &&
         <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
-          <div className='w-5/6 p-2  h-1/2 max-w-7xl min-w-[350px] '>
+          <div className='w-5/6 p-2  h-1/2 max-w-6xl min-w-[350px] '>
 
           </div>
-          <div className='w-5/6 p-2  h-1/2 max-w-7xl min-w-[350px] '>
+          <div className='w-5/6 p-2  h-1/2 max-w-6xl min-w-[350px] '>
 
           </div>
         </section>}
       {currentTab === 'social' &&
         <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
-          <div className='w-full p-2  h-full max-w-7xl min-w-[350px] '>
+          <div className='w-full p-2  h-full max-w-6xl min-w-[350px] '>
 
           </div>
         </section>}
