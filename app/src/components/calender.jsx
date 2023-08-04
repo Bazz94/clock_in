@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import CalendarHeatmap from 'react-calendar-heatmap';
+import { Stage, Layer, Line, Text, Circle, Group, Rect, Arc } from 'react-konva';
 
 /*
   0 : After today       : transparent
@@ -24,20 +25,29 @@ function Calendar({user}) {
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [tooltipText, setTooltipText] = useState('');
   const [values, setValues] = useState(null);
+  const ref = useRef(null);
+  const [dimensions, setDimensions] = useState({ w: 0, h: 0 });
   
   useEffect(() => {
     const {from , to} = getFromAndToDates();
     setFromDate(from);
     setToDate(to);
     setValues(populateEmptyDays(user.currentDay, user.days));
+    
+    console.log(dimensions);
   }, [user.currentDay, user.days])
+
+  useLayoutEffect(() => {
+    setDimensions({ w: ref.current.offsetWidth, h: ref.current.offsetHeight });
+  },[ref]);
 
   const handleMouseMove = (e) => {
     setTooltipPosition({ y: e.pageY, x: e.pageX });
   };
   return (
-    <div className="flex w-full h-full px-4" onMouseMove={handleMouseMove}>
-      {values && <CalendarHeatmap
+    <div className="relative flex w-full h-full min-h-[258px]" onMouseMove={handleMouseMove} ref={ref}>
+      {values && 
+      <CalendarHeatmap
         startDate={fromDate}
         endDate={toDate}
         values={values}
@@ -67,6 +77,16 @@ function Calendar({user}) {
           <p className=''>{tooltipText.count}</p>
         </span>
       )}
+      {dimensions.w !== 0 && 
+      <div 
+        className='' 
+        style={{
+          position: "absolute",
+          top: dimensions.h - 50
+        }}
+      >
+        <Legend dimensions={dimensions}/>
+      </div>}
     </div>
   )
 }
@@ -111,3 +131,33 @@ function populateEmptyDays(currentDay, days) {
   return newData;
 }
 
+
+const Legend = ({ dimensions }) => {
+  const items = [
+    {
+      text: 'Complete',
+      color: '#22FFBC'
+    },
+    {
+      text: 'Partial',
+      color: '#FFFF22'
+    },
+    {
+      text: 'Absent',
+      color: '#FF2265'
+    },
+  ];
+  const y = 0;
+  const xStart = (dimensions.w / items.length);
+  const xInterval = Math.max(xStart / 2, 80);
+  return (
+    <Stage width={dimensions.w} height={20}>
+      {items.map((item, index) => (
+        <Layer key={index}>
+          <Text x={xStart + (index * xInterval)} y={y} text={item.text} fontSize={16} fill='#FFF' align='right' width={item.text.length * 10} />
+          <Circle x={xStart + (index * xInterval) + (item.text.length * 10) + 10} y={y + 7} radius={6} fill={item.color} />
+        </Layer>
+      ))}
+    </Stage>
+  );
+}

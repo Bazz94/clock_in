@@ -35,7 +35,7 @@ function SideDrawer({ openSideDrawer, setOpenSideDrawer }) {
   }
 
   return (
-    <div ref={drawerRef} className={`${animation} flex flex-col  bg-neutral-800 shadow-sm shadow-neutral-700`}>
+    <div ref={drawerRef} className={`${animation} flex flex-col bg-grey`}>
       <button 
         className="flex items-center justify-center h-20 p-2 border-none rounded-md toggle-button hover:scale-110"
         onClick={() => setOpenSideDrawer(false)}

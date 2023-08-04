@@ -13,7 +13,7 @@ const Timeline = ({day}) => {
   const [dimensions, setDimensions] = useState({ w: 0, h: 0 });
   const [margins, setMargins] = useState({t: 0, l: 0, b: 0, r: 0, ym: 0, xm: 0});
 
-  const xMargin = 30;
+  const xMargin = 0;
   const yMargin = 30;
   useLayoutEffect(() => {
     if (parentRef) {
@@ -36,11 +36,12 @@ const Timeline = ({day}) => {
           height={parentRef && dimensions.h}>
           {dimensions.h !== 0 && 
             <Layer>
+              <Background margins={margins}/>
               <Grid margins={margins} xTickCount={12}/>
               <Legend margins={margins}/>
-              <CurrentTimeDot margins={margins} time={time}/>
-              <Shapes margins={margins} day={day}/>
               {day.workStarts[0] && <Schedule day={day} margins={margins}/>}
+              <Shapes margins={margins} day={day}/>
+              <CurrentTimeDot margins={margins} time={time}/>
             </Layer>}
         </Stage>
       </div>
@@ -48,6 +49,24 @@ const Timeline = ({day}) => {
 }
 
 export default Timeline;
+
+
+const Background = ({ margins }) => {
+  const date = new Date();
+  const w = timeToXValue(date, margins);
+  return (
+    <Group>
+      <Rect 
+        x={margins.l}
+        y={margins.t}
+        width={w - margins.l}
+        height={margins.b - margins.t}
+        fill={'#222222'}
+        opacity={0.5}
+      />
+    </Group>
+  )
+}
 
 
 const Grid = ({ margins, xTickCount}) => {
@@ -80,7 +99,9 @@ const Grid = ({ margins, xTickCount}) => {
           <Text key={index+1}
               x={line.x2 - 10} y={line.y2 - 22}
               align='center'
-              text={`${1+(index*2)}`} fontSize={15} fill={'#eee'}
+              text={`${1+(index*2)}`} 
+              fontSize={16} 
+              fill={'#FFFFFF'}
               width={20}
             />
         </Group>
@@ -110,18 +131,18 @@ const Legend = ({ margins }) => {
     },
     {
       text: 'Late',
-      color: '#FFFF22'
+      color: '#FF2265'
     },
   ];
-  const y = margins.b + 15;
+  const y = margins.b + 22;
   const xStart = (margins.r - margins.l)/items.length;
-  const xInterval = 150;
+  const xInterval = Math.max(xStart/2,80);
   return (
     <Group>
       {items.map((item, index) => (
         <Group key={index}>
-          <Text x={xStart + (index * xInterval)} y={y - 7} text={item.text} fontSize={15} fill='#eee' align='right' width={70}/>
-          <Circle x={xStart + (index * xInterval) + 80} y={y} radius={6} fill={item.color}/>
+          <Text x={xStart + (index * xInterval)} y={y - 7} text={item.text} fontSize={16} fill='#FFFFFF' align='right' width={item.text.length*10}/>
+          <Circle x={xStart + (index * xInterval) + item.text.length * 10 + 10} y={y} radius={6} fill={item.color}/>
         </Group>
       ))}
     </Group>
@@ -130,18 +151,19 @@ const Legend = ({ margins }) => {
 
 const CurrentTimeDot = ({margins, time}) => {
   const date = new Date();
-  const currentTimePoint = { x: timeToXValue(date, margins.r), y: margins.ym };
+  const x = timeToXValue(date, margins);
 
   return (
     <Group>
       <Line
         x={0}
         y={0}
-        points={[margins.l, margins.ym, currentTimePoint.x, currentTimePoint.y]}
+        points={[margins.l, margins.ym, x, margins.ym]}
         closed
         stroke="#eee"
         strokeWidth={2}
       />
+      <Circle x={x} y={margins.ym} radius={2} fill={"#eee"} />
     </Group>
   )
 }
@@ -155,12 +177,10 @@ const Shapes = ({margins , day}) => {
         margins, day.clockedIn[i], day.clockedOut[i])
     });
     shapes.push({
-      color: '#FFFF22', rect: calculateRect(
+      color: '#FF2265', rect: calculateRect(
         margins, day.workStarts[i], day.clockedIn[i], day.workEnds[i])
     });
   }
-  console.log(calculateRect(
-    margins, day.clockedIn[0], day.clockedOut[0]))
   return (
     <Group>
       {shapes.map((shape, index) => (
@@ -173,7 +193,6 @@ const Shapes = ({margins , day}) => {
           tension={0.4}
           fill={shape.color}
           opacity={0.8}
-          {...console.log(shape)}
         />
       ))}
     </Group>
@@ -189,16 +208,15 @@ function calculateRect(margins, start, end, workEnd) {
   if (!startDate) {
     return [];
   }
-  const x = timeToXValue(startDate, margins.r);
-  console.log(x);
+  const x = timeToXValue(startDate, margins);
   // is Late rect
   if (workEndDate) {
     if (endDate && startDate >= endDate) {
       return [];
     }
     const date = new Date();
-    if (date > workEndDate) {
-      const w =timeToXValue(workEndDate, margins.r) - x;
+    if (!endDate && date > workEndDate) {
+      const w = timeToXValue(workEndDate, margins) - x;
       return {
         x: x,
         w: w,
@@ -207,14 +225,14 @@ function calculateRect(margins, start, end, workEnd) {
   }
   if (!endDate) {
     const date = new Date();
-    const w = timeToXValue(date, margins.r) - x;
+    const w = timeToXValue(date, margins) - x;
     return {
       x: x,
       w: w,
     }
   }
   if (endDate) {
-    const w = timeToXValue(endDate, margins.r) - x;
+    const w = timeToXValue(endDate, margins) - x;
     return {
       x: x,
       w: w,
@@ -223,36 +241,34 @@ function calculateRect(margins, start, end, workEnd) {
 }
 
 
-function timeToXValue(date, canvasWidth) {
+function timeToXValue(date, margins) {
   let totalMinutes = date.getMinutes() + (date.getHours() * 60);
-  const timeX = (totalMinutes / 1440) * (canvasWidth);
-  return timeX;
+  const timeX = (totalMinutes / 1440) * (margins.r - margins.l);
+  return timeX + margins.l;
 }
 
 
 const Schedule = ({day, margins}) => {
-  const workStartsX = timeToXValue(new Date(day.workStarts[0]), margins.r);
-  const workEndsX = timeToXValue(new Date(day.workEnds[0]), margins.r);
+  const workStartsX = timeToXValue(new Date(day.workStarts[0]), margins);
+  const workEndsX = timeToXValue(new Date(day.workEnds[0]), margins);
   return (
     <Group>
       <Line
         x={0}
         y={0}
         points={[workStartsX, margins.t, workStartsX, margins.b]}
-        closed
         stroke={"#00ABFF"}
         strokeWidth={1}
       />
-      <Text x={workStartsX + 3} y={margins.t} text={'Start'} fontSize={15} fill="#00ABFF" width={50} />
+      <Text x={workStartsX + 3} y={margins.t + 2} text={'Start'} fontSize={16} fill="#00ABFF" width={50} />
       <Line
         x={0}
         y={0}
         points={[workEndsX, margins.t, workEndsX, margins.b]}
-        closed
         stroke={"#00ABFF"}
         strokeWidth={1}
       />
-      <Text x={workEndsX + 3} y={margins.t} text={'Finish'} fontSize={15} fill="#00ABFF" width={50} />
+      <Text x={workEndsX + 3} y={margins.t + 2} text={'Finish'} fontSize={16} fill="#00ABFF" width={50} />
     </Group>
   )
 }

@@ -22,7 +22,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false); // {message: 'error', redirect: false}
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
-  const [date, setDate] = useState(null);
+  
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tab') ? localStorage.getItem('tab') : 'home');
   const [user, userDispatch] = useUserReducer();
   const [currentDay, currentDayDispatch] = useCurrentDayReducer();
@@ -35,12 +35,6 @@ export default function Home() {
       navigate("/login");
       return () => {};
     }
-
-    const date = new Date();
-    const options = { day: '2-digit', month: 'long', year: 'numeric' };
-    const formattedDate = date.toLocaleDateString('en-UK', options);
-    setDate(formattedDate);
-
     // Get user data
     setIsLoading(true);
     getUserFromDB(token, 'user').then(data => {
@@ -82,7 +76,7 @@ export default function Home() {
 
   
   return isLoading ? (<Loading />) : (
-    <div className="h-screen bg-black">
+    <div className="flex flex-col items-center justify-center h-screen bg-black">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
       {user && <NavBar 
         user={user} 
@@ -92,14 +86,14 @@ export default function Home() {
         setCurrentTab={setCurrentTab}
       />}
       {currentTab === 'home' && 
-        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
-          <div className='w-5/6 p-2  h-1/3 space-y-5 max-w-6xl border border-neutral-400 rounded-lg min-w-[350px] '>
+        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
+          <div className='flex justify-center flex-1 w-full p-2 m-6 space-y-5 bg-opacity-50 rounded-xl bg-grey'>
             {user && <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch}/>}
           </div>
-          <div className='w-5/6 p-2  h-1/3 max-w-6xl border border-neutral-400 rounded-lg min-w-[350px] '>
+          <div className='w-full p-2 rounded-lg h-1/3 '>
             {user && <Timeline day={currentDay}/>}
           </div>
-          <div className='w-5/6 p-2  h-1/3 max-w-6xl border border-neutral-400 rounded-lg min-w-[350px] '>
+          <div className='w-full bg-opacity-50 rounded-lg h-1/3'>
             {user && <Calendar user={user} />}
           </div>
         </section>}
