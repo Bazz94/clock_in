@@ -152,7 +152,7 @@ const Legend = ({ margins }) => {
 const CurrentTimeDot = ({margins, time}) => {
   const date = new Date();
   const x = timeToXValue(date, margins);
-
+  time;
   return (
     <Group>
       <Line
@@ -163,7 +163,7 @@ const CurrentTimeDot = ({margins, time}) => {
         stroke="#eee"
         strokeWidth={2}
       />
-      <Circle x={x} y={margins.ym} radius={2} fill={"#eee"} />
+      <Circle x={x} y={margins.ym} radius={4} fill={"#eee"} />
     </Group>
   )
 }

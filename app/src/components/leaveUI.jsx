@@ -10,68 +10,78 @@ const LeaveUI = ({ schedule, scheduleDispatch}) => {
   const [isRemove, setIsRemove] = useState('add');
 
   return (
-    <div className='relative flex flex-row flex-wrap sm:flex-1 min-h-[400px]'>
-      <div className='flex-1 h-full m-2 mt-0 border shadow-md sm:m-4 sm:mt-0 border-neutral-800 rounded-xl'>
-        <div className="flex flex-col items-center justify-center w-full h-full p-2">
-          <div className="flex">
-            <span className="m-5">Sicked Days Used: {schedule.sickUsed}</span>
-            <span className="m-5">Leave remaining: {schedule.annulLeave - schedule.leaveUsed}</span>
-          </div>
-          <div className='relative flex flex-col items-center justify-center flex-1' style={{color: "black"}}>
-            {schedule && <Calendar 
-              onChange={(value, event) => {
-                // Selected is a leave day
-                if (schedule.scheduledLeave.find(day => sameDay(day, value))) {
-                  setIsRemove(true);
-                  setOpenPopup(true);
-                  setSelectedDay(value);
-                  return false;
-                }
-                if (schedule.scheduledSick.find(day => sameDay(day, value))) {
-                  setIsRemove(true);
-                  setOpenPopup(true);
-                  setSelectedDay(value);
-                  return false;
-                }
-                if (selectedDay && sameDay(selectedDay, value)) {
-                  setSelectedDay(null);
-                  return false;
-                } 
-                setIsRemove(false);
-                setOpenPopup(true);
-                setSelectedDay(value);
-              }} 
-              value={selectedDay}
-              minDate={new Date()}
-              tileClassName={({ activeStartDate, date, view }) => {
-                if (view !== 'month') return null;
-                let today = new Date();
-                today = today.toDateString();
-                if (sameDay(date, today)) return null;
-                if (schedule.scheduledLeave.find(day => sameDay(day, date))) {
-                  return 'leave-day';
-                }
-                if (schedule.scheduledSick.find(day => sameDay(day, date))) {
-                  return 'sick-day';
-                }
-                if (sameDay(selectedDay, date)) {
-                  return 'selected-day';
-                }
-                return null;
-              }}
-            />}
+    <div className='flex relative flex-1 h-full w-min-[366px]'>
+      <div className="flex flex-col items-center justify-center w-full h-full p-2">
+        <div className="flex flex-col items-center justify-center w-1/2 h-full">  
+          <h2 className='flex items-center text-2xl h-1/2'>
+            Schedule Leave
+          </h2>
+          <div className="flex w-full row h-1/2">
+            <div className="flex flex-col w-1/2">
+              <label className="m-2 text-center opacity-70">Leave Days Left</label>
+              <label className="text-2xl text-center text-blue">{schedule.annulLeave - schedule.leaveUsed}</label>
+            </div>
+            <div className="flex flex-col w-1/2">
+              <label className="m-2 text-center opacity-70">Sick Days Used</label>
+              <label className="text-2xl text-center text-yellow">{schedule.sickUsed}</label>
+            </div>
           </div>
         </div>
-        <LeavePopup 
-          openPopup={openPopup}
-          setOpenPopup={setOpenPopup} 
-          selectedDay={selectedDay}
-          setSelectedDay={setSelectedDay}
-          schedule={schedule}
-          scheduleDispatch={scheduleDispatch}
-          isRemove={isRemove}
-        />
+        <div className='relative flex flex-col items-center justify-center h-2/3'>
+          {schedule && <Calendar 
+            onChange={(value, event) => {
+              // Selected is a leave day
+              if (schedule.scheduledLeave.find(day => sameDay(day, value))) {
+                setIsRemove(true);
+                setOpenPopup(true);
+                setSelectedDay(value);
+                return false;
+              }
+              if (schedule.scheduledSick.find(day => sameDay(day, value))) {
+                setIsRemove(true);
+                setOpenPopup(true);
+                setSelectedDay(value);
+                return false;
+              }
+              if (selectedDay && sameDay(selectedDay, value)) {
+                setSelectedDay(null);
+                return false;
+              } 
+              setIsRemove(false);
+              setOpenPopup(true);
+              setSelectedDay(value);
+            }} 
+            value={selectedDay}
+            minDate={new Date()}
+            tileClassName={({ activeStartDate, date, view }) => {
+              if (view !== 'month') return null;
+              let today = new Date();
+              today = today.toDateString();
+              if (sameDay(date, today)) return null;
+              if (schedule.scheduledLeave.find(day => sameDay(day, date))) {
+                return 'leave-day';
+              }
+              if (schedule.scheduledSick.find(day => sameDay(day, date))) {
+                return 'sick-day';
+              }
+              if (sameDay(selectedDay, date)) {
+                return 'selected-day';
+              }
+              return null;
+            }}
+          />}
+          <label className="m-2 text-sm text-center opacity-70">*Select a day to schedule leave</label>
+        </div>
       </div>
+      <LeavePopup 
+        openPopup={openPopup}
+        setOpenPopup={setOpenPopup} 
+        selectedDay={selectedDay}
+        setSelectedDay={setSelectedDay}
+        schedule={schedule}
+        scheduleDispatch={scheduleDispatch}
+        isRemove={isRemove}
+      />
     </div>
   )
 }

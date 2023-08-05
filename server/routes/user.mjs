@@ -12,8 +12,7 @@ router.get('/', authToken, async (req, res) => {
     // Get user document
     const query = { _id: new ObjectId(uid) };
     const options = {
-      sort: { "days.date": -1 },
-      projection: { days: { $slice: -182}, password: 0 },
+      projection: { days: { $slice: -364}, password: 0 },
     };
     let users = await db.collection("users");
     let user = await users.findOne(query, options);
@@ -23,7 +22,7 @@ router.get('/', authToken, async (req, res) => {
     // Checking if currentDay has passed
     const date = new Date();
     const currentDayDate = new Date(user.currentDay.date);
-
+    
     if (!sameDay(date, currentDayDate, user.timezone)) {
       // Push currentDay to days and init currentDay
       console.log('New Day');
@@ -34,7 +33,7 @@ router.get('/', authToken, async (req, res) => {
       const query = { _id: new ObjectId(uid) };
       const updates = {
         $push: {
-          days: { $each: newDays }
+          days: { $each: newDays, $sort: { date: -1 } }
         },
         $set: {
           currentDay: newCurrentDay,
@@ -42,7 +41,7 @@ router.get('/', authToken, async (req, res) => {
         },
       };
       const options = {
-        projection: { days: { $slice: -182 }, password: 0 },
+        projection: { days: { $slice: -364 }, password: 0 },
         includeResultMetadata: false
       };
       user = await users.findOneAndUpdate(query, updates, options);

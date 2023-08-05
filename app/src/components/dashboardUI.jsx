@@ -94,19 +94,25 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
     <div className='flex flex-col min-w-[350px] w-full sm:flex-row sm:h-full'>
       <div className="flex flex-col items-center justify-center w-full h-full px-5 sm:w-1/3 ">
         <div className="flex flex-col items-center justify-center w-full h-1/2">
-          <span className="m-2 text-center opacity-70">Currently</span>
-          <span className="text-2xl text-center">{currentEvent}</span>
+          <label className="m-2 text-center opacity-70">Currently</label>
+          <label className={`text-2xl text-center 
+            ${working && ' text-green'} 
+            ${currentEvent === 'Late' && ' text-red'}`}>
+            {currentEvent}
+          </label>
         </div>
         <div className="flex flex-col items-center justify-center w-full h-1/2">
-          <button className={`text-xl flex items-center justify-center h-10 m-1 text-black rounded-md  w-32 hover:scale-105 
-            ${currentEvent !== 'working' ? ' bg-red' : ' bg-green'}`}>
+          <button className={`text-xl flex items-center justify-center h-10 m-1  rounded-md  w-32 hover:scale-105 
+            ${working ? ' bg-red text-white' : ' bg-green text-black'}`}
+            onClick={handleClockIn}>
             {clockInButtonText}
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-1">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </button>
-          {currentEvent === 'working' 
-            ? <button className="w-32 h-10 m-1 text-black rounded-md hover:scale-105 bg-yellow" >
+          {working 
+            ? <button className="w-32 h-10 m-1 text-xl text-black rounded-md hover:scale-105 bg-yellow" 
+                onClick={handleBreak}>
                 {breakStartButtonText }
               </button> 
             : <div className="h-10 m-1 w-28"></div>}
@@ -114,18 +120,18 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
       </div>
       <div className="flex flex-col items-center justify-center w-full h-full px-5 sm:w-1/3 ">
         <div className="flex flex-col items-center justify-center w-full h-1/2">
-          <span className="m-2 text-3xl text-center opacity-70">{date}</span>
-          <span className="text-4xl text-center">{time}</span>
+          <label className="m-2 text-3xl text-center opacity-70">{date}</label>
+          <label className="text-4xl text-center ">{time}</label>
         </div>
       </div>
       <div className="flex flex-col items-center justify-center w-full h-full px-5 sm:w-1/3 ">
         <div className="flex flex-col items-center justify-center w-full h-1/2">
-          <span className="m-2 text-center opacity-70">Today</span>
-          <span className="text-2xl text-center">{mSecondsDateToString(worked)}</span>
+          <label className="m-2 text-center opacity-70">Today</label>
+          <label className="text-2xl text-center text-green">{mSecondsDateToString(worked)}</label>
         </div>
         <div className="flex flex-col items-center justify-center w-full h-1/2">
-          <span className="m-2 text-center opacity-70">Last 7 Days</span>
-          <span className="text-2xl text-center">{mSecondsDateToString(user.worked7)}</span>
+          <label className="m-2 text-center opacity-70">Last 7 Days</label>
+          <label className="text-2xl text-center text-green">{mSecondsDateToString(user.worked7)}</label>
         </div>
       </div>
     </div>

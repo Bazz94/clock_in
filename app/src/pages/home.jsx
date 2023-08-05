@@ -6,7 +6,7 @@ import SideDrawer from '../components/sideDrawer.jsx';
 import NavBar from '../components/navbar.jsx';
 import Timeline from '../components/timeline.jsx';
 import DashboardUI from '../components/dashboardUI.jsx';
-import Calendar from '../components/calender.jsx';
+import Waffle from '../components/waffle.jsx';
 import ScheduleUI from '../components/scheduleUI.jsx';
 import LeaveUI from '../components/leaveUI.jsx';
 import Popup from '../components/popup.jsx';
@@ -90,24 +90,24 @@ export default function Home() {
           <div className='flex justify-center flex-1 w-full p-2 m-6 space-y-5 bg-opacity-50 rounded-xl bg-grey'>
             {user && <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch}/>}
           </div>
-          <div className='w-full p-2 rounded-lg h-1/3 '>
+          <div className='w-full p-2 rounded-lg h-1/3'>
             {user && <Timeline day={currentDay}/>}
           </div>
           <div className='w-full bg-opacity-50 rounded-lg h-1/3'>
-            {user && <Calendar user={user} />}
+            {user && <Waffle user={user} />}
           </div>
         </section>}
       {currentTab === 'schedule' &&
-        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
-          <div className='w-5/6 p-2  h-1/2 max-w-6xl min-w-[350px] '>
-
+        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
+          <div className='w-full p-2 h-2/5'>
+            {user && <ScheduleUI schedule={schedule} scheduleDispatch={scheduleDispatch}/>}
           </div>
-          <div className='w-5/6 p-2  h-1/2 max-w-6xl min-w-[350px] '>
-
+          <div className='w-full p-2 h-3/5'>
+            {user && <LeaveUI schedule={schedule} scheduleDispatch={scheduleDispatch} />}
           </div>
         </section>}
       {currentTab === 'social' &&
-        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen p-5 ' >
+        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
           <div className='w-full p-2  h-full max-w-6xl min-w-[350px] '>
 
           </div>

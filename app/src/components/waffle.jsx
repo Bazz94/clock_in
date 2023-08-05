@@ -18,7 +18,7 @@ const typeToCount = {
   absent: 4,
 }
 
-function Calendar({user}) {
+function Waffle({user}) {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -33,8 +33,6 @@ function Calendar({user}) {
     setFromDate(from);
     setToDate(to);
     setValues(populateEmptyDays(user.currentDay, user.days));
-    
-    console.log(dimensions);
   }, [user.currentDay, user.days])
 
   useLayoutEffect(() => {
@@ -45,53 +43,58 @@ function Calendar({user}) {
     setTooltipPosition({ y: e.pageY, x: e.pageX });
   };
   return (
-    <div className="relative flex w-full h-full min-h-[258px]" onMouseMove={handleMouseMove} ref={ref}>
-      {values && 
-      <CalendarHeatmap
-        startDate={fromDate}
-        endDate={toDate}
-        values={values}
-        showWeekdayLabels={true}
-        showOutOfRangeDays={true}
-        onMouseOver={(event, value) => {
-          if (!value) {
-            return false;
-          }
-          setShowTooltip(true);
-          setTooltipText({ date: value.date, count: Object.keys(typeToCount).find((key) => typeToCount[key] === value.count) });
-        }}
-        onMouseLeave={(event, value) => {
-          setShowTooltip(false)
-        }}
-        classForValue={(value) => {
-          if (value == null) {
-            return `color-scale-0`;
-          }
-          return `color-scale-${value.count}`;
-        }}
-      />}
-      {showTooltip && (
-        <span className={`absolute bg-white text-neutral-950 p-2 flex flex-col justify-center items-center rounded-lg animate-fadeOut`} 
-          style={{ left: tooltipPosition.x -50 +'px', top: tooltipPosition.y - 70 + 'px' }}>
-          <p className=''>{tooltipText.date}</p>
-          <p className=''>{tooltipText.count}</p>
-        </span>
-      )}
-      {dimensions.w !== 0 && 
-      <div 
-        className='' 
-        style={{
-          position: "absolute",
-          top: dimensions.h - 50
-        }}
-      >
-        <Legend dimensions={dimensions}/>
-      </div>}
+    <div className='w-full h-full min-h-[258px]' onMouseMove={handleMouseMove} ref={ref}> 
+      <div className="flex w-full h-full">
+        {values && 
+        <CalendarHeatmap
+          startDate={fromDate}
+          endDate={toDate}
+          values={values}
+          showWeekdayLabels={true}
+          showOutOfRangeDays={true}
+          onMouseOver={(event, value) => {
+            if (!value) {
+              return false;
+            }
+            setShowTooltip(true);
+            setTooltipText({ date: value.date, count: Object.keys(typeToCount).find((key) => typeToCount[key] === value.count) });
+          }}
+          onMouseLeave={(event, value) => {
+            setShowTooltip(false);
+          }}
+          classForValue={(value) => {
+            if (value == null) {
+              return `color-scale-0`;
+            }
+            return `color-scale-${value.count}`;
+          }}
+        />}
+        {showTooltip && (
+          <span className={`absolute bg-white text-neutral-950 p-2 flex flex-col justify-center items-center rounded-lg animate-fadeOut`} 
+            style={{ left: tooltipPosition.x -50 +'px', top: tooltipPosition.y - 70 + 'px' }}>
+            <p className=''>{tooltipText.date}</p>
+            <p className=''>{tooltipText.count}</p>
+          </span>
+        )}
+      </div>
+      <div className="relative -top-full">
+        {dimensions.w !== 0 && 
+        <div 
+          className='' 
+          style={{
+            position: "absolute",
+            top: dimensions.h - 50,
+            zIndex: 0
+          }}
+        >
+          <Legend dimensions={dimensions}/>
+        </div>}
+      </div>
     </div>
   )
 }
 
-export default Calendar;
+export default Waffle;
 
 function getFromAndToDates() {
   let to, from;
@@ -107,7 +110,7 @@ function getFromAndToDates() {
 // needs useMemo
 function populateEmptyDays(currentDay, days) {
   const currentDate = new Date(currentDay.date);
-  const strCurrentDate = currentDate.toISOString().split('T')[0];
+  const strCurrentDate = getLocalDate(currentDate);
   const newCurrentDay = { date: strCurrentDate, count: 1 }
   const newData = [];
   const date = new Date();
@@ -116,11 +119,11 @@ function populateEmptyDays(currentDay, days) {
   date.setDate(date.getDate() + 1);
   for (let i = 0; i < 364; i++) {
     date.setDate(date.getDate() - 1);
-    const strDate = date.toISOString().split('T')[0];
+    const strDate = getLocalDate(date);
     let day = { date: strDate, count: date > today ? 0 : 1 };
     if (index < days.length) {
       const dateObj = new Date(days[index].date);
-      if (dateObj.toISOString().split('T')[0] === strDate) {
+      if (getLocalDate(dateObj) === strDate) {
         day.count = typeToCount[days[index].status];
         index++;
       }
@@ -131,6 +134,14 @@ function populateEmptyDays(currentDay, days) {
   return newData;
 }
 
+
+function getLocalDate(now) {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const localDate = `${year}-${month}-${day}`;
+  return localDate;
+}
 
 const Legend = ({ dimensions }) => {
   const items = [
