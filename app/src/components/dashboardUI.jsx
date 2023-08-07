@@ -4,20 +4,25 @@ import config from '../config/config.js';
 
 
 const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
+  const { time } = useContext(MyContext);
+  const [date, setDate] = useState(null);
   const [currentEvent, setCurrentEvent] = useState('');
   const [clockInButtonText, setClockInButton] = useState('Clock-in');
   const [breakStartButtonText, setBreakStartButtonText] = useState('Start break');
   const [working, setWorking] = useState(false);
   const [onBreak, setOnBreak] = useState(false);
   const [worked, setWorked] = useState(0);
-  console.log('worked: ', worked)
+
   useEffect(() => {
+    const date = new Date();
+    const options = { day: '2-digit', month: 'long', year: 'numeric' };
+    const formattedDate = date.toLocaleDateString('en-UK', options);
+    setDate(formattedDate);
     setWorked(calculateWorked(currentDay));
     const now = new Date();
     setTimeout(() => {
       setWorked(calculateWorked(currentDay));
       setInterval(() => {
-        console.log('tick');
         setWorked(calculateWorked(currentDay));
       },1000 * 60);
     }, (60 - now.getSeconds()) * 1000);
@@ -30,9 +35,9 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
       setClockInButton('Clock-in')
     }
     if (currentEvent === 'On break') {
-      setBreakStartButtonText('End break');
+      setBreakStartButtonText('End Break');
     } else {
-      setBreakStartButtonText('Start break')
+      setBreakStartButtonText('Start Break')
     }
     setWorking(currentEvent === 'Working');
   }, [currentEvent, currentDay]);
@@ -86,35 +91,47 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
 
   
   return (
-    <div className='flex flex-row flex-wrap sm:flex-1 min-h-[400px]'>
-      <div className='flex-1 m-2 mt-0 border shadow-md sm:m-4 sm:mt-0 border-neutral-800 rounded-xl'>
-        <div className="flex flex-col items-center justify-center w-full h-full p-2">
-          <p className="p-3 text-lg">
-            Current Event</p>
-          <p className="pb-8 text-2xl">
-            {currentEvent && currentEvent}</p>
-          <button className="p-2 m-1 rounded-3xl w-28 hover:scale-105 bg-neutral-500" 
-            onClick={handleClockIn}
-          >
+    <div className='flex flex-col min-w-[350px] w-full sm:flex-row sm:h-full'>
+      <div className="flex flex-col items-center justify-center w-full h-full px-5 sm:w-1/3 ">
+        <div className="flex flex-col items-center justify-center w-full h-1/2">
+          <label className="m-2 text-center opacity-70">Currently</label>
+          <label className={`text-2xl text-center 
+            ${working && ' text-green'} 
+            ${currentEvent === 'Late' && ' text-red'}`}>
+            {currentEvent}
+          </label>
+        </div>
+        <div className="flex flex-col items-center justify-center w-full h-1/2">
+          <button className={`text-xl flex items-center justify-center h-10 m-1  rounded-md  w-36 hover:scale-105 
+            ${working ? ' bg-red text-white' : ' bg-green text-black'}`}
+            onClick={handleClockIn}>
             {clockInButtonText}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 ml-1">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </button>
-          {working && <button className="p-2 m-1 rounded-3xl w-28 hover:scale-105 bg-neutral-500"
-            onClick={handleBreak}
-          >
-            {breakStartButtonText}
-          </button>}
+          {working 
+            ? <button className="h-10 m-1 text-xl text-black rounded-md w-36 hover:scale-105 bg-yellow" 
+                onClick={handleBreak}>
+                {breakStartButtonText }
+              </button> 
+            : <div className="h-10 m-1 w-28"></div>}
         </div>
       </div>
-      <div className='flex-1 m-2 mt-0 border shadow-md sm:m-4 sm:mt-0 border-neutral-800 rounded-xl'>
-        <div className="flex flex-col items-center justify-center w-full h-full p-2">
-          <p className="p-1 text-lg">
-            Today</p>
-          <p className="pb-4 text-2xl">
-            {worked && mSecondsDateToString(worked)}</p>
-          <p className="pb-1 text-lg">
-            Last 7 Days</p>
-          <p className="pb-4 text-2xl">
-            {user && mSecondsDateToString(user.worked7)}</p>
+      <div className="flex flex-col items-center justify-center w-full h-full px-5 sm:w-1/3 ">
+        <div className="flex flex-col items-center justify-center w-full h-1/2">
+          <label className="m-2 text-3xl text-center opacity-70">{date}</label>
+          <label className="text-4xl text-center ">{time}</label>
+        </div>
+      </div>
+      <div className="flex flex-col items-center justify-center w-full h-full px-5 sm:w-1/3 ">
+        <div className="flex flex-col items-center justify-center w-full h-1/2">
+          <label className="m-2 text-center opacity-70">Today</label>
+          <label className="text-2xl text-center text-green">{mSecondsDateToString(worked)}</label>
+        </div>
+        <div className="flex flex-col items-center justify-center w-full h-1/2">
+          <label className="m-2 text-center opacity-70">Last 7 Days</label>
+          <label className="text-2xl text-center text-green">{mSecondsDateToString(user.worked7)}</label>
         </div>
       </div>
     </div>

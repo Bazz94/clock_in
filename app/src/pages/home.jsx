@@ -6,7 +6,7 @@ import SideDrawer from '../components/sideDrawer.jsx';
 import NavBar from '../components/navbar.jsx';
 import Timeline from '../components/timeline.jsx';
 import DashboardUI from '../components/dashboardUI.jsx';
-import Calendar from '../components/calender.jsx';
+import Waffle from '../components/waffle.jsx';
 import ScheduleUI from '../components/scheduleUI.jsx';
 import LeaveUI from '../components/leaveUI.jsx';
 import Popup from '../components/popup.jsx';
@@ -14,6 +14,7 @@ import useUserReducer from '../reducers/useUserReducer.jsx';
 import useCurrentDayReducer from '../reducers/useCurrentDayReducer.jsx';
 import useScheduleReducer from '../reducers/useScheduleReducer.jsx';
 import { updateDB, getUserFromDB } from '../fetch/serverRequests.jsx';
+import TeamsUI from '../components/teamsUI.jsx';
 
 
 export default function Home() {
@@ -22,7 +23,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false); // {message: 'error', redirect: false}
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
-  const [date, setDate] = useState(null);
+  
   const [currentTab, setCurrentTab] = useState(localStorage.getItem('tab') ? localStorage.getItem('tab') : 'home');
   const [user, userDispatch] = useUserReducer();
   const [currentDay, currentDayDispatch] = useCurrentDayReducer();
@@ -35,12 +36,6 @@ export default function Home() {
       navigate("/login");
       return () => {};
     }
-
-    const date = new Date();
-    const options = { day: '2-digit', month: 'long', year: 'numeric' };
-    const formattedDate = date.toLocaleDateString('en-UK', options);
-    setDate(formattedDate);
-
     // Get user data
     setIsLoading(true);
     getUserFromDB(token, 'user').then(data => {
@@ -60,7 +55,6 @@ export default function Home() {
     }).catch(err => {
       setError({message: err.message, redirect: true});
     }).finally(() => setIsLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -83,7 +77,7 @@ export default function Home() {
 
   
   return isLoading ? (<Loading />) : (
-    <div className="flex flex-col h-screen bg-black">
+    <div className="flex flex-col items-center justify-center h-screen bg-black ">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
       {user && <NavBar 
         user={user} 
@@ -92,32 +86,33 @@ export default function Home() {
         currentTab={currentTab}
         setCurrentTab={setCurrentTab}
       />}
-      <section className='flex flex-col items-center justify-center h-[90%] w-screen' >
-        <div className='flex flex-row justify-center w-full h-full p-0 sm:p-5 md:w-5/6 lg:w-full xl:w-5/6 max-w-7xl min-w-[16rem]'>
-          <div className='flex-col hidden w-1/3 lg:flex'>
-            <div className='flex items-center justify-center h-16'>
-              <h1 className='text-xl'>{date}</h1>
-            </div>
-            <div className='flex items-center justify-center flex-1 mx-4 border shadow-md border-neutral-800 rounded-xl'>
-              {user && <Timeline day={currentDay}/>}
-            </div>
+      {currentTab === 'home' && 
+        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
+          <div className='flex justify-center flex-1 w-full p-2 m-2 space-y-5 rounded-xl bg-grey'>
+            {user && <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch}/>}
           </div>
-          <div className='flex flex-col w-full lg:w-2/3 min-w-[16rem] justify-center'>
-            <div className='flex items-center justify-center h-16 pr-6 ml-6'>
-              <h1 className='text-xl'>Welcome</h1>
-            </div>
-            {user && (currentTab === 'home' 
-              ? <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch} />  
-              : currentTab === 'schedule'
-                ? <ScheduleUI schedule={schedule} scheduleDispatch={scheduleDispatch}/> 
-                : <LeaveUI schedule={schedule} scheduleDispatch={scheduleDispatch} />)
-            }
-            <div className='m-2 mb-2 border shadow-md sm:m-4 sm:mb-0 sm:h-1/3 border-neutral-800 rounded-xl h-fit'>
-              {user && <Calendar user={user} />}
-            </div>
+          <div className='w-full p-2 m-2 border rounded-lg h-1/3 border-grey'>
+            {user && <Timeline day={currentDay}/>}
           </div>
-        </div>
-      </section>
+          <div className='w-full m-2 border rounded-lg h-1/3 border-grey'>
+            {user && <Waffle user={user} />}
+          </div>
+        </section>}
+      {currentTab === 'schedule' &&
+        <section className='flex md:flex-row flex-col  justify-center items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
+          <div className='w-full p-2 m-4 rounded-lg md:w-1/2 h-2/3 bg-grey'>
+            {user && <ScheduleUI schedule={schedule} scheduleDispatch={scheduleDispatch}/>}
+          </div>
+          <div className='w-full p-2 m-4 rounded-lg md:w-1/2 h-2/3 bg-grey'>
+            {user && <LeaveUI schedule={schedule} scheduleDispatch={scheduleDispatch} />}
+          </div>
+        </section>}
+      {currentTab === 'teams' &&
+        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
+          <div className='flex justify-center flex-1 w-full p-2 m-2 space-y-5 rounded-xl bg-grey'>
+            <TeamsUI />
+          </div>
+        </section>}
       <Popup
         error={error}
         setError={setError}
@@ -126,7 +121,6 @@ export default function Home() {
     </div>
   )
 }
-
 
 
 

@@ -46,26 +46,29 @@ const LeavePopup = ({ openPopup, setOpenPopup, selectedDay, setSelectedDay, sche
   }
 
   return (
-    <div className="absolute z-10 flex items-center justify-center w-full h-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-      <div className="w-full mx-3 h-full min-h-[300px] min-w-[300px] flex flex-col items-center justify-center border rounded-lg opacity-100 bg-neutral-800">
-      <p className='p-10'>
-        {'Pick leave type for ' + selectedDay.toISOString().slice(0,10)}
+    <div className="absolute z-10 flex items-center justify-center w-full h-full -translate-x-1/2 -translate-y-1/2 rounded-lg opacity-100 top-1/2 left-1/2 bg-grey">
+      <div className="w-full mx-3 h-full min-h-[300px] min-w-[300px] flex flex-col items-center justify-center ">
+      <p className='p-10 pb-1 text-white text-opacity-60'>
+        {`Pick leave type for`}
       </p>
-      <button className={`p-3 m-2 rounded-lg hover:scale-105 bg-neutral-600
+      <p className='p-10 pt-0'>
+        {formatDate(getLocalDate(selectedDay))}
+      </p>
+      <button className={` m-2 p-2 w-16 rounded-lg hover:scale-105 bg-green text-black
         ${isRemove && "hidden"}`} 
         onClick={handleSick}
       >
         Sick
       </button>
-      <button className={`p-3 m-2 rounded-lg hover:scale-105 bg-neutral-600
+      <button className={`p-2 w-20  m-2 rounded-lg hover:scale-105 bg-green text-black
         ${isRemove && "hidden"}`} onClick={handleLeave}>
         Leave
       </button>
-      <button className={`p-3 m-2 rounded-lg hover:scale-105 bg-neutral-600
+      <button className={`p-2 w-20  m-2 rounded-lg hover:scale-105 bg-red
         ${!isRemove && "hidden"}`} onClick={handleRemove}>
         Remove
       </button>
-      <button className="p-3 m-2 rounded-lg hover:scale-105 bg-neutral-600" onClick={handleClose}>
+      <button className="w-20 p-2 m-2 rounded-lg hover:scale-105 bg-red" onClick={handleClose}>
         Cancel
       </button>
       </div>
@@ -81,4 +84,25 @@ function sameDay(date1, date2) {
   const newDate2 = new Date(date2);
   const result = newDate1.toDateString().slice(0, 10) === newDate2.toDateString().slice(0, 10);
   return result;
+}
+
+
+function formatDate(yyyy_mm_dd) {
+  const [year, month, day] = yyyy_mm_dd.split('-');
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June', 'July',
+    'August', 'September', 'October', 'November', 'December'
+  ];
+
+  const formattedDate = `${parseInt(day, 10)} ${monthNames[parseInt(month, 10) - 1]} ${year}`;
+  return formattedDate;
+}
+
+
+function getLocalDate(now) {
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const localDate = `${year}-${month}-${day}`;
+  return localDate;
 }

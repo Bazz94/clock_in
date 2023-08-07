@@ -2,11 +2,11 @@
   font-family: Inter, Arial, sans-serif;
   font-weight: 400;
 
-  color: rgba(255, 255, 255, 0.87);
+  color: white;
   background-color:#171717;
   width: 100vw;
   height: 100vh;
-  overflow: hidden;
+  /* overflow: hidden; */
   position: fixed;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -20,20 +20,22 @@ html {
 }
 
 /* Calender heatmap */
+
 .react-calendar-heatmap .color-scale-0 {
   fill: transparent;
 }
 .react-calendar-heatmap .color-scale-1 {
-  fill: black;
+  fill: #222222;
+  opacity: 0.5;
 }
 .react-calendar-heatmap .color-scale-2 {
-  fill: green;
+  fill: #22FFBC;
 }
 .react-calendar-heatmap .color-scale-3 {
-  fill: yellow;
+  fill: #FFFF22;
 }
 .react-calendar-heatmap .color-scale-4 {
-  fill: red;
+  fill: #FF2265;
 }
 
 .react-calendar-heatmap-weekday-label {
@@ -47,16 +49,11 @@ html {
 }
 
 .react-calendar-heatmap {
-  top: 1.6rem;
-  right: 0.8rem;
+  top: 1rem;
+  right: 0.3rem;
   position: relative;
 }
 
-/* Timeline */
-canvas {
-  width: 100%;
-  max-width: 100%;
-  height: 100%;
-}
+
 
 /* Time picker */

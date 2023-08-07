@@ -17,8 +17,8 @@ function reducer(state, action) {
     // set
     case 'set': {
       // Check that the required vars are set from action param
-      if (action.timezone === undefined && action.worked7 === undefined && action.streak === undefined
-        && action.sickUsed === undefined && action.leaveLeft === undefined
+      if (action.status === undefined && action.worked === undefined
+        && action.worked7 === undefined && action.team === undefined
       ) {
         throw Error('Incorrect properties for set on userReducer');
       }
