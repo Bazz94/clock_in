@@ -19,33 +19,33 @@ function NavBar({ user, openSideDrawer, setOpenSideDrawer, currentTab, setCurren
   }
 
   function clickSocial() {
-    setCurrentTab('social');
-    localStorage.setItem('tab', 'social');
+    setCurrentTab('teams');
+    localStorage.setItem('tab', 'teams');
   }
 
   return (
     <nav className='flex justify-center h-20 bg-black min-w-[350px] max-w-7xl w-screen p-5'>
         <div className='flex w-2/3'>
-          <button className='px-5 text-xl text-left hover:-translate-y-[2px] hover:opacity-80 hover:text-green' 
+        <button className='px-5 text-xl text-left border rounded-md group hover:bg-grey hover:bg-opacity-50 hover:text-green border-grey' 
             onClick={clickUsername}>
-            {user.name}
+          <p className='group-hover:-translate-y-[2px]'>{user.name}</p>
           </button>
         </div>
         <div className='flex justify-end w-2/3'>
-          <button className={`px-5 text-xl hover:text-green
-            ${currentTab === 'home' ? selected : 'hover:-translate-y-[2px] hover:opacity-80'}`}
+        <button className={`group px-3 mx-2 text-xl hover:text-green border
+            ${currentTab === 'home' ? selected : ' hover:bg-grey hover:bg-opacity-50 border-grey'}`}
             onClick={clickHome}>
-            Home
+          <p className={currentTab !== 'home' ? 'group-hover:-translate-y-[2px]' : ''}>Home</p>
           </button>
-          <button className={`px-5 text-xl hover:text-green
-            ${currentTab === 'schedule' ? selected : 'hover:-translate-y-[2px] hover:opacity-80'}`}
+        <button className={`group px-3 mx-2 text-xl hover:text-green border
+            ${currentTab === 'schedule' ? selected : ' hover:bg-grey hover:bg-opacity-50 border-grey'}`}
             onClick={clickSchedule}>
-            Schedule
+          <p className={currentTab !== 'schedule' ? 'group-hover:-translate-y-[2px]' : ''}>Schedule</p>
           </button>
-          <button className={`px-5 text-xl hover:text-green
-            ${currentTab === 'social' ? selected : 'hover:-translate-y-[2px] hover:opacity-80'}`}
+        <button className={`group px-3 mx-2 text-xl hover:text-green border
+            ${currentTab === 'teams' ? selected : ' hover:bg-grey hover:bg-opacity-50 border-grey'}`}
             onClick={clickSocial}>
-            Social
+          <p className={currentTab !== 'teams' ? 'group-hover:-translate-y-[2px]' : ''}>Teams</p>
           </button>
         </div>
     </nav>

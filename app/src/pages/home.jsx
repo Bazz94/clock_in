@@ -14,6 +14,7 @@ import useUserReducer from '../reducers/useUserReducer.jsx';
 import useCurrentDayReducer from '../reducers/useCurrentDayReducer.jsx';
 import useScheduleReducer from '../reducers/useScheduleReducer.jsx';
 import { updateDB, getUserFromDB } from '../fetch/serverRequests.jsx';
+import TeamsUI from '../components/teamsUI.jsx';
 
 
 export default function Home() {
@@ -76,7 +77,7 @@ export default function Home() {
 
   
   return isLoading ? (<Loading />) : (
-    <div className="flex flex-col items-center justify-center h-screen bg-black">
+    <div className="flex flex-col items-center justify-center h-screen bg-black ">
       <SideDrawer openSideDrawer={openSideDrawer} setOpenSideDrawer={setOpenSideDrawer}/>
       {user && <NavBar 
         user={user} 
@@ -87,29 +88,29 @@ export default function Home() {
       />}
       {currentTab === 'home' && 
         <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
-          <div className='flex justify-center flex-1 w-full p-2 m-6 space-y-5 bg-opacity-50 rounded-xl bg-grey'>
+          <div className='flex justify-center flex-1 w-full p-2 m-2 space-y-5 rounded-xl bg-grey'>
             {user && <DashboardUI user={user} currentDay={currentDay} currentDayDispatch={currentDayDispatch}/>}
           </div>
-          <div className='w-full p-2 rounded-lg h-1/3'>
+          <div className='w-full p-2 m-2 border rounded-lg h-1/3 border-grey'>
             {user && <Timeline day={currentDay}/>}
           </div>
-          <div className='w-full bg-opacity-50 rounded-lg h-1/3'>
+          <div className='w-full m-2 border rounded-lg h-1/3 border-grey'>
             {user && <Waffle user={user} />}
           </div>
         </section>}
       {currentTab === 'schedule' &&
-        <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
-          <div className='w-full p-2 h-2/5'>
+        <section className='flex md:flex-row flex-col  justify-center items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
+          <div className='w-full p-2 m-4 rounded-lg md:w-1/2 h-2/3 bg-grey'>
             {user && <ScheduleUI schedule={schedule} scheduleDispatch={scheduleDispatch}/>}
           </div>
-          <div className='w-full p-2 h-3/5'>
+          <div className='w-full p-2 m-4 rounded-lg md:w-1/2 h-2/3 bg-grey'>
             {user && <LeaveUI schedule={schedule} scheduleDispatch={scheduleDispatch} />}
           </div>
         </section>}
-      {currentTab === 'social' &&
+      {currentTab === 'teams' &&
         <section className='flex flex-col items-center h-[calc(100vh-80px)] w-screen px-5 min-w-[350px] max-w-7xl' >
-          <div className='w-full p-2  h-full max-w-6xl min-w-[350px] '>
-
+          <div className='flex justify-center flex-1 w-full p-2 m-2 space-y-5 rounded-xl bg-grey'>
+            <TeamsUI />
           </div>
         </section>}
       <Popup

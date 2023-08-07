@@ -10,24 +10,22 @@ const LeaveUI = ({ schedule, scheduleDispatch}) => {
   const [isRemove, setIsRemove] = useState('add');
 
   return (
-    <div className='flex relative flex-1 h-full w-min-[366px]'>
-      <div className="flex flex-col items-center justify-center w-full h-full p-2">
-        <div className="flex flex-col items-center justify-center w-1/2 h-full">  
-          <h2 className='flex items-center text-2xl h-1/2'>
-            Schedule Leave
-          </h2>
-          <div className="flex w-full row h-1/2">
-            <div className="flex flex-col w-1/2">
-              <label className="m-2 text-center opacity-70">Leave Days Left</label>
-              <label className="text-2xl text-center text-blue">{schedule.annulLeave - schedule.leaveUsed}</label>
-            </div>
-            <div className="flex flex-col w-1/2">
-              <label className="m-2 text-center opacity-70">Sick Days Used</label>
-              <label className="text-2xl text-center text-yellow">{schedule.sickUsed}</label>
-            </div>
+    <div className='flex flex-col relative justify-center items-center flex-1 h-full w-min-[366px]'>
+        <h2 className='flex items-center m-2 text-2xl h-1/6'>
+          Schedule Leave
+        </h2>
+      <div className="flex flex-col items-center justify-center w-full p-2"> 
+        <div className="flex justify-center w-full m-2 row">
+          <div className="flex flex-col m-2">
+            <label className="mx-2 text-center opacity-70">Leave Days Left</label>
+            <label className="text-2xl text-center text-blue">{schedule.annulLeave - schedule.leaveUsed}</label>
+          </div>
+          <div className="flex flex-col m-2">
+            <label className="mx-2 text-center opacity-70">Sick Days Used</label>
+            <label className="text-2xl text-center text-yellow">{schedule.sickUsed}</label>
           </div>
         </div>
-        <div className='relative flex flex-col items-center justify-center h-2/3'>
+        <div className='relative flex flex-col justify-center m-2 h-2/3'>
           {schedule && <Calendar 
             onChange={(value, event) => {
               // Selected is a leave day
@@ -70,7 +68,7 @@ const LeaveUI = ({ schedule, scheduleDispatch}) => {
               return null;
             }}
           />}
-          <label className="m-2 text-sm text-center opacity-70">*Select a day to schedule leave</label>
+          <label className="m-4 text-sm text-center opacity-70">*Select a date to schedule leave</label>
         </div>
       </div>
       <LeavePopup 

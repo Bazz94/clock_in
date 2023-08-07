@@ -35,9 +35,9 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
       setClockInButton('Clock-in')
     }
     if (currentEvent === 'On break') {
-      setBreakStartButtonText('End break');
+      setBreakStartButtonText('End Break');
     } else {
-      setBreakStartButtonText('Start break')
+      setBreakStartButtonText('Start Break')
     }
     setWorking(currentEvent === 'Working');
   }, [currentEvent, currentDay]);
@@ -102,7 +102,7 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
           </label>
         </div>
         <div className="flex flex-col items-center justify-center w-full h-1/2">
-          <button className={`text-xl flex items-center justify-center h-10 m-1  rounded-md  w-32 hover:scale-105 
+          <button className={`text-xl flex items-center justify-center h-10 m-1  rounded-md  w-36 hover:scale-105 
             ${working ? ' bg-red text-white' : ' bg-green text-black'}`}
             onClick={handleClockIn}>
             {clockInButtonText}
@@ -111,7 +111,7 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch }) => {
             </svg>
           </button>
           {working 
-            ? <button className="w-32 h-10 m-1 text-xl text-black rounded-md hover:scale-105 bg-yellow" 
+            ? <button className="h-10 m-1 text-xl text-black rounded-md w-36 hover:scale-105 bg-yellow" 
                 onClick={handleBreak}>
                 {breakStartButtonText }
               </button> 

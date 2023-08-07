@@ -107,9 +107,9 @@ router.post('/', async (req, res) => {
       name: name,
       timezone: timezone,
       startedDate: date,
+      work: 0,
       worked7: 0,
-      streak: 0,
-      consistency: 100, // % of not bad days
+      team: null,
       schedule: {
         workStarts: null,
         workEnds: null,

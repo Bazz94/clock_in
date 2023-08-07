@@ -39,9 +39,23 @@ function Waffle({user}) {
     setDimensions({ w: ref.current.offsetWidth, h: ref.current.offsetHeight });
   },[ref]);
 
+  useEffect(() => {
+    window.addEventListener('resize', updateDimensions);
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  },[]);
+
+  function updateDimensions() {
+    if (ref) {
+      setDimensions({ w: ref.current.offsetWidth, h: ref.current.offsetHeight });
+    }
+  }
+
   const handleMouseMove = (e) => {
     setTooltipPosition({ y: e.pageY, x: e.pageX });
   };
+
   return (
     <div className='w-full h-full min-h-[258px]' onMouseMove={handleMouseMove} ref={ref}> 
       <div className="flex w-full h-full">

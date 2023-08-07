@@ -1,4 +1,4 @@
-import { useLayoutEffect, useContext, useState } from 'react';
+import { useLayoutEffect, useContext, useState, useEffect, useMemo, useRef } from 'react';
 import { Stage, Layer, Line, Text, Circle, Group, Rect, Arc } from 'react-konva';
 import { MyContext } from '../contexts/MyContextProvider.jsx';
 
@@ -9,31 +9,54 @@ import { MyContext } from '../contexts/MyContextProvider.jsx';
 
 const Timeline = ({day}) => {
   const { time } = useContext(MyContext);
-  const [parentRef, setParentRef] = useState(null);
+  const parentRef = useRef(null);
   const [dimensions, setDimensions] = useState({ w: 0, h: 0 });
   const [margins, setMargins] = useState({t: 0, l: 0, b: 0, r: 0, ym: 0, xm: 0});
 
   const xMargin = 0;
   const yMargin = 30;
   useLayoutEffect(() => {
-    if (parentRef) {
-      setDimensions({ w: parentRef.offsetWidth, h: parentRef.offsetHeight });
+    if (parentRef.current) {
+      setDimensions({ w: parentRef.current.offsetWidth, h: parentRef.current.offsetHeight });
       setMargins({ 
         t: yMargin, 
         l: xMargin, 
-        b: parentRef.offsetHeight - yMargin, 
-        r: parentRef.offsetWidth - xMargin, 
-        ym: parentRef.offsetHeight/2, 
-        xm: parentRef.offsetWidth/2, 
+        b: parentRef.current.offsetHeight - yMargin, 
+        r: parentRef.current.offsetWidth - xMargin, 
+        ym: parentRef.current.offsetHeight/2, 
+        xm: parentRef.current.offsetWidth/2, 
       });
     }
-  }, [parentRef, day]);
+  }, [day]);
   
+  function updateDimensions() {
+    if (parentRef) {
+      setDimensions({ w: parentRef.current.offsetWidth, h: parentRef.current.offsetHeight });
+      setMargins({
+        t: yMargin,
+        l: xMargin,
+        b: parentRef.current.offsetHeight - yMargin,
+        r: parentRef.current.offsetWidth - xMargin,
+        ym: parentRef.current.offsetHeight / 2,
+        xm: parentRef.current.offsetWidth / 2,
+      });
+    }
+  }
+
+  useEffect(() => {
+    window.addEventListener('resize', updateDimensions);
+    return () => {
+      window.removeEventListener('resize', updateDimensions);
+    };
+  },[]);
+
+
+
   return (
-    <div ref={setParentRef} className="" style={{ height: '100%', width: '100%' }}>
+    <div ref={parentRef} className="" style={{ height: '100%', width: '100%' }}>
         <Stage
-          width={parentRef && dimensions.w}
-          height={parentRef && dimensions.h}>
+          width={parentRef.current && dimensions.w}
+          height={parentRef.current && dimensions.h}>
           {dimensions.h !== 0 && 
             <Layer>
               <Background margins={margins}/>
@@ -49,6 +72,9 @@ const Timeline = ({day}) => {
 }
 
 export default Timeline;
+
+
+
 
 
 const Background = ({ margins }) => {

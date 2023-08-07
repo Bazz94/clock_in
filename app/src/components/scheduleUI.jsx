@@ -61,28 +61,28 @@ const ScheduleUI = ({ schedule, scheduleDispatch }) => {
     setWorkEndsError(false);
     setWorkEnds(e.target.value);
   }
-
+  
   return (
     <form className="flex flex-col items-center justify-center w-full h-full p-2"
       onSubmit={handleSubmit}>
-        <h2 className='m-2 text-2xl'>
+        <h2 className='flex items-center m-2 text-2xl h-1/6'>
           Set Schedule
         </h2>
         <div className='flex flex-col items-center justify-center flex-1'>
-          <div className="flex m-2 h-7 w-[366px]">
-            <label className="w-32">Days to work: </label>
-            <WeekPicker editEnabled={editEnabled} daysToWork={daysToWork} setDaysToWork={setDaysToWork}/>
-          </div>
-        <div className="h-7 flex m-2 w-[366px]">
-            <label className="w-32">Work starts: </label>
+        <div className="flex m-2 h-7 w-[366px]">
+          <label className="w-28 opacity-70">Days to work </label>
+          <WeekPicker editEnabled={editEnabled} daysToWork={daysToWork} setDaysToWork={setDaysToWork}/>
+        </div>
+        <div className="h-7 flex m-2 w-[366px] ">
+          <label className="w-28 opacity-70">Work starts </label>
           {editEnabled ? <input className={`h-7 flex tracking-wider text-black focus:outline-none ${workStartsError ? "focus:border-2 focus:border-red-400" : ''}`}
               type="time"
               value={workStarts}
               onChange={changeWorkStart}
             /> : <label className="w-32">{workStarts} </label>}
           </div>
-        <div className=" h-7 flex m-2  w-[366px]">
-            <label className="w-32">Work ends: </label>
+        <div className=" h-7 flex m-2 w-[366px]">
+          <label className="w-28 opacity-70">Work ends </label>
           {editEnabled ? <input className={`h-7 flex tracking-wider text-black focus:outline-none${workEndsError ? "border-2 border-red-400" : ''}`}
                 type="time"
                 value={workEnds}
@@ -93,8 +93,8 @@ const ScheduleUI = ({ schedule, scheduleDispatch }) => {
             <p className="">{estimateHr.current} hours per week</p>
             <p className="text-sm opacity-70">*includes 1 hr lunch per day</p>
           </div>
-          <button className='w-16 p-2 mt-4 rounded-lg bg-red text-md hover:scale-105' type="submit">
-          {editEnabled ? 'Ok' : 'Edit'}
+          <button className='w-16 p-2 mt-6 rounded-lg bg-red text-md hover:scale-105' type="submit">
+            {editEnabled ? 'Ok' : 'Edit'}
           </button>
         </div>
     </form>
@@ -112,9 +112,10 @@ const WeekPicker = ({ editEnabled, daysToWork, setDaysToWork }) => {
         return (
           <button 
             key={index}
-            className={`flex justify-center w-6 px-3 mx-1 align-middle rounded-full cursor-default 
-              ${daysToWork.find(item => item === index) != null ? "bg-green text-grey" : "bg-grey"} 
-              ${editEnabled ? "hover:scale-105 cursor-pointer" : ''}`}
+            className={`flex justify-center w-6 px-3 mx-1 align-middle items-center rounded-full cursor-default 
+              ${daysToWork.find(item => item === index) != null ? " bg-green text-grey" : " bg-grey"} 
+              ${editEnabled ? "hover:scale-105 cursor-pointer" : ''}
+              ${index === 0 && " ml-0"}`}
             onClick={(e) => {
               e.preventDefault();
               if (!editEnabled) return false;
