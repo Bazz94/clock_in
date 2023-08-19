@@ -59,7 +59,35 @@ export function updateDB(token, route, update) {
 	});
 }
 
-export function updateDb_teams(token, route, data) {
+export function getDb_teams(token) {
+	const requestOptions = {
+		method: "GET",
+		headers: {
+			"Content-type": "application/json",
+			authorization: `Bearer ${token}`,
+		},
+	};
+	return new Promise((res, rej) => {
+		fetch(`${config.apiUrl}/teams/`, requestOptions)
+			.then((res) => {
+				if (res.ok) {
+					return res.json();
+				}
+				if (res.status === 500) {
+					throw Error("Server error");
+				}
+				throw Error("Failed to connect to server");
+			})
+			.then((data) => {
+				res(data);
+			})
+			.catch((err) => {
+				rej(err.message);
+			});
+	});
+}
+
+export function updateDb_teams(token, route, data = {}) {
 	const requestType = route === "create" ? "POST" : "PATCH";
 	const requestOptions = {
 		method: requestType,

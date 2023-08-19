@@ -50,28 +50,10 @@ router.get("/", authToken, async (req, res) => {
 			}
 		}
 
-		let team;
-		if (user.team) {
-			// Get user document
-			const query2 = { _id: new ObjectId(user.team) };
-			const teams = db.collection("teams");
-			team = await teams.findOne(query2);
-			if (!team) {
-				return res.status(404).json("Team not found");
-			}
-			// // Get all team members
-			// const memberObjectIds = team.members.map((id) => new ObjectId(id));
-			// const query3 = { _id: { $in: memberObjectIds } };
-			// const options3 = {
-			// 	projection: { name: 1, worked7: 1, currentDay: 1, days: { $slice: -364 } },
-			// };
-			// const teamMembers = await users.find(query3, options3).toArray();
-		}
-
 		// Return user
 		return res
 			.status(200)
-			.json({ user: user, currentDay: user.currentDay, schedule: user.schedule, team: team });
+			.json({ user: user, currentDay: user.currentDay, schedule: user.schedule });
 	} catch (err) {
 		return res.status(500).json(err.message);
 	}

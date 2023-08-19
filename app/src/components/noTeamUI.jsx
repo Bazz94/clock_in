@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState, useContext } from "react";
-import TeamsPopup from "./teamPopup";
+import { useState, useContext } from "react";
 import { updateDb_teams } from "../fetch/serverRequests";
 import { MyContext } from "../contexts/MyContextProvider.jsx";
 
@@ -8,9 +7,8 @@ const MODE = {
 	create: "create",
 };
 
-const NoTeamUI = ({ setError, user, userDispatch }) => {
-	const { token, updateToken } = useContext(MyContext);
-	const [teamId, setTeamId] = useState(null);
+const NoTeamUI = ({ setError, userDispatch }) => {
+	const { token } = useContext(MyContext);
 	const [mode, setMode] = useState(MODE.join);
 	const [name, setName] = useState("");
 	const [inputError, setInputError] = useState(false);
@@ -30,7 +28,6 @@ const NoTeamUI = ({ setError, user, userDispatch }) => {
 					type: "set",
 					team: _teamID,
 				});
-				setTeamId(_teamID);
 			})
 			.catch((err) => {
 				console.log(err);
@@ -52,12 +49,11 @@ const NoTeamUI = ({ setError, user, userDispatch }) => {
 		};
 		updateDb_teams(token, "create", payload)
 			.then((_teamID) => {
-				console.log(_teamID);
+				console.log("team created: ", _teamID);
 				userDispatch({
 					type: "set",
 					team: _teamID,
 				});
-				setTeamId(_teamID);
 			})
 			.catch((err) => {
 				console.log(err);

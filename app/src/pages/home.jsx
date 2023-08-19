@@ -31,7 +31,6 @@ export default function Home() {
 	const [currentDay, currentDayDispatch] = useCurrentDayReducer();
 	const [status, setStatus] = useState();
 	const [schedule, scheduleDispatch] = useScheduleReducer();
-	const [team, setTeam] = useState();
 
 	useEffect(() => {
 		console.log("token:", token.slice(0, 20));
@@ -56,9 +55,6 @@ export default function Home() {
 					type: "init",
 					schedule: data.schedule,
 				});
-				if (data.team) {
-					setTeam(data.team);
-				}
 			})
 			.catch((err) => {
 				setError({ message: err.message, redirect: true });
@@ -90,19 +86,6 @@ export default function Home() {
 			console.log(value);
 		});
 	}, [schedule]);
-
-	useEffect(() => {
-		if (!user || !user.team) {
-			return () => {};
-		}
-		console.log("User updated");
-		const payload = {
-			team: user.team,
-		};
-		updateDB(token, "user", payload).then((value) => {
-			console.log(value);
-		});
-	}, [user]);
 
 	return isLoading ? (
 		<Loading />
@@ -158,13 +141,7 @@ export default function Home() {
 					)}
 					{user && user.team && (
 						<div className="flex justify-center flex-1 w-full py-2 my-2 space-y-5 rounded-xl bg-grey">
-							<HasTeamUI
-								setError={setError}
-								user={user}
-								userDispatch={userDispatch}
-								team={team}
-								setTeam={setTeam}
-							/>
+							<HasTeamUI setError={setError} user={user} userDispatch={userDispatch} />
 						</div>
 					)}
 				</section>
