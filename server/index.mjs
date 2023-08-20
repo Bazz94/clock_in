@@ -1,9 +1,14 @@
 import express, { json } from "express";
+import http from "http";
 import cors from "cors";
 import "./loadEnvironment.mjs";
 import rateLimit from "express-rate-limit";
+import connectSocket from "./sockets/socket.mjs";
+import setupChangeStream from "./sockets/teamsStream.mjs";
 
 const app = express();
+const server = http.createServer(app);
+const io = connectSocket(server);
 
 const limiter = rateLimit({
 	windowMs: 60 * 1000, // 1 minute
@@ -14,6 +19,8 @@ const limiter = rateLimit({
 var corsOptions = {
 	origin: "*",
 	optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+	methods: ["GET", "POST", "PATCH"],
+	credentials: true,
 };
 
 // Middleware
@@ -47,5 +54,10 @@ app.use("/schedule", scheduleRouter);
 import teams from "./routes/teams.mjs";
 app.use("/teams", teams);
 
+// Streams
+setupChangeStream(io);
+
 // Listen for connections
-app.listen(process.env.PORT, () => console.log("Server started"));
+server.listen(process.env.PORT, () => console.log("Server started"));
+
+export default server;

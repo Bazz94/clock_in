@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useContext } from "react";
 import { MyContext } from "../contexts/MyContextProvider.jsx";
 import Waffle from "../components/waffle.jsx";
 import { updateDb_teams, getDb_teams } from "../fetch/serverRequests.jsx";
+import io from "socket.io-client";
 
 const HasTeamUI = ({ setError, user, userDispatch }) => {
 	const { token } = useContext(MyContext);
@@ -10,14 +11,46 @@ const HasTeamUI = ({ setError, user, userDispatch }) => {
 	const codeExpires = useRef();
 	const getIsBusy = useRef(false);
 
+	function updateMember(id, currentDay) {
+		const newTeamMembers = teamMembers.map((member) => {
+			console.log("flag1: ", id, member._id);
+			if (id === member._id) {
+				return { ...member, currentDay: currentDay };
+			}
+			return member;
+		});
+		setTeamMembers(newTeamMembers);
+	}
+
+	useEffect(() => {
+		if (!team) return () => {};
+		const socket = io("http://localhost:5050");
+		// Add event listeners and handlers here
+		socket.on("connect", () => {
+			console.log("Connected to server");
+
+			const teamId = team._id.toString();
+			console.log(teamId);
+
+			socket.on(teamId, (data) => {
+				if (data.from === user._id) return false;
+				console.log("Update received:", data);
+				updateMember(data.from, data.currentDay);
+			});
+		});
+
+		return () => {
+			socket.disconnect();
+		};
+	}, [team]);
+
 	useEffect(() => {
 		if (team || !user.team || getIsBusy.current) return () => {};
-		console.log(team, user.team);
+
 		getDb_teams(token)
 			.then((data) => {
 				console.log("Got team data");
 				codeExpires.current = new Date(data.team.codeExpires);
-				console.log(data.members);
 				setTeam(data.team);
 				setTeamMembers(data.members);
 				getIsBusy.current = false;
@@ -39,6 +72,7 @@ const HasTeamUI = ({ setError, user, userDispatch }) => {
 				console.log("Created invite code");
 				setTeam({ ...team, code: data.code, codeExpires: data.codeExpires });
 				codeExpires.current = new Date(data.codeExpires);
+				const now = new Date();
 			})
 			.catch((err) => {
 				console.log(err);
@@ -107,7 +141,7 @@ const HasTeamUI = ({ setError, user, userDispatch }) => {
 			</div>
 			<div className="flex flex-col items-center flex-1 w-full">
 				{teamMembers.map((value, index) => (
-					<Accordion key={index} member={value} />
+					<Accordion key={index} member={value} team={team} />
 				))}
 			</div>
 		</div>
@@ -116,23 +150,39 @@ const HasTeamUI = ({ setError, user, userDispatch }) => {
 
 export default HasTeamUI;
 
-const Accordion = ({ member }) => {
+const Accordion = ({ member, team }) => {
 	const [isOpen, setIsOpen] = useState(false);
+	const [worked, setWorked] = useState(calculateWorked(member.currentDay));
 
 	const toggleAccordion = () => {
 		setIsOpen(!isOpen);
 	};
+
+	useEffect(() => {
+		const now = new Date();
+		// Calculate the time remaining until the next minute
+		const timeoutId = setTimeout(() => {
+			setWorked(calculateWorked(member.currentDay));
+			const intervalId = setInterval(() => {
+				setWorked(calculateWorked(member.currentDay));
+			}, 1000 * 60); // 1000 ms * 60 seconds = 1 minute
+			return () => clearInterval(intervalId);
+		}, (60 - now.getSeconds()) * 1000);
+		return () => clearTimeout(timeoutId);
+	}, []);
+
 	return (
 		<div className="flex flex-col w-full border-t border-white border-opacity-10 border-x last:border-b hover:bg-opacity-20 hover:bg-black">
 			<div className="flex w-full p-2 py-3" onClick={toggleAccordion}>
-				<span className="w-1/6 px-2 ">{member.name}</span>
+				<div className="w-1/6 px-2 ">
+					<span>{member.name}</span>
+					{member._id === team.admin && <span className="pl-4 opacity-50">admin</span>}
+				</div>
 				<div className="flex w-4/6 justify-evenly">
 					<span className="flex justify-center w-32 px-2 ">
 						{calculateCurrentEvent(member.currentDay)}
 					</span>
-					<span className="flex justify-center w-32 px-2">
-						{mSecondsDateToString(member.currentDay.worked)}
-					</span>
+					<span className="flex justify-center w-32 px-2">{mSecondsDateToString(worked)}</span>
 					<span className="flex justify-center w-32 px-2">
 						{mSecondsDateToString(member.worked7)}
 					</span>
@@ -154,7 +204,7 @@ const Accordion = ({ member }) => {
 				className={`w-full  bg-black overflow-hidden transition-all duration-500 
           ${isOpen ? " h-[250px] " : " h-0 "}`}
 			>
-				<div className={`w-full h-[290px] -translate-y-6`}>
+				<div className={`relative w-full h-[290px] -translate-y-6`}>
 					<Waffle user={member} />
 				</div>
 			</div>
@@ -227,4 +277,23 @@ function calculateCurrentEvent(currentDay) {
 		}
 	}
 	return result;
+}
+
+function calculateWorked(day) {
+	let worked = 0;
+	if (!day) return worked;
+	const now = new Date();
+	for (let i = 0; i < day.clockedIn.length; i++) {
+		if (day.clockedIn[i]) {
+			const WorkStarted = new Date(day.clockedIn[i]);
+			WorkStarted.setSeconds(0);
+			if (day.clockedOut[i]) {
+				const WorkEnded = new Date(day.clockedOut[i]);
+				worked += WorkEnded - WorkStarted;
+			} else {
+				worked += now - WorkStarted;
+			}
+		}
+	}
+	return worked;
 }

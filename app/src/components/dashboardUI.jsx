@@ -30,13 +30,17 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch, status, setStatus }
 		const options = { day: "2-digit", month: "long", year: "numeric" };
 		const formattedDate = now.toLocaleDateString("en-UK", options);
 		setDate(formattedDate);
-		setTimeout(() => {
+		const timeoutId = setTimeout(() => {
 			setWorked(calculateWorked(currentDay));
-			setInterval(() => {
+			const intervalId = setInterval(() => {
 				const newWorked = calculateWorked(currentDay);
 				setWorked(newWorked);
-			}, 1000 * 60);
+			}, 1000 * 60); // 1000 ms * 60 seconds = 1 minute
+			return () => clearInterval(intervalId);
 		}, (60 - now.getSeconds()) * 1000);
+
+		// Clear the timeout if the component unmounts
+		return () => clearTimeout(timeoutId);
 	}, []);
 
 	function handleClockIn() {

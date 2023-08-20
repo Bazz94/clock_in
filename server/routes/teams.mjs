@@ -33,7 +33,9 @@ router.get("/", authToken, async (req, res) => {
 		}
 
 		// Get team members data
-		const query2 = { team: team._id };
+		const query2 = {
+			$and: [{ team: team._id }, { _id: { $ne: new ObjectId(uid) } }],
+		};
 		const options2 = {
 			projection: {
 				_id: 1,
