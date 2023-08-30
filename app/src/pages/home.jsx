@@ -23,7 +23,7 @@ export default function Home() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState(false); // {message: 'error', redirect: false}
 	const [openSideDrawer, setOpenSideDrawer] = useState(false);
-
+	("test");
 	const [currentTab, setCurrentTab] = useState(
 		localStorage.getItem("tab") ? localStorage.getItem("tab") : "home"
 	);
