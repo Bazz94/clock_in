@@ -18,7 +18,7 @@ function reducer(state, action) {
     case 'set': {
       // Check that the required vars are set from action param
       if (action.status === undefined && action.worked === undefined
-        && action.worked7 === undefined && action.team === undefined
+        && action.team === undefined
       ) {
         throw Error('Incorrect properties for set on userReducer');
       }
