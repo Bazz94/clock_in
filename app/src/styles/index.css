@@ -1,59 +1,62 @@
 :root {
-  font-family: Inter, Arial, sans-serif;
-  font-weight: 400;
+	font-family: Inter, Arial, sans-serif;
+	font-weight: 400;
 
-  color: white;
-  background-color:#171717;
-  width: 100vw;
-  height: 100vh;
-  /* overflow: hidden; */
-  position: fixed;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
+	color: white;
+	background-color: #171717;
+	width: 100vw;
+	height: 100vh;
+	/* overflow: hidden; */
+	position: fixed;
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	-webkit-text-size-adjust: 100%;
 }
 
 html {
-  overflow: hidden;
+	overflow: hidden;
 }
 
-/* Calender heatmap */
+/* Waffle */
 
 .react-calendar-heatmap .color-scale-0 {
-  fill: transparent;
+	fill: transparent;
 }
 .react-calendar-heatmap .color-scale-1 {
-  fill: #222222;
-  opacity: 0.5;
+	fill: #222222;
+	opacity: 0.5;
 }
 .react-calendar-heatmap .color-scale-2 {
-  fill: #22FFBC;
+	fill: #22ffbc;
 }
 .react-calendar-heatmap .color-scale-3 {
-  fill: #FFFF22;
+	fill: #ffff22;
 }
 .react-calendar-heatmap .color-scale-4 {
-  fill: #FF2265;
+	fill: #ff2265;
+}
+
+.react-calendar-heatmap .color-scale-5 {
+	fill: #00abff;
 }
 
 .react-calendar-heatmap-weekday-label {
-  font-size: 0.5rem;
-  fill: #eee;
+	font-size: 0.5rem;
+	fill: #eee;
 }
 
 .react-calendar-heatmap-month-label {
-  font-size: 0.5rem;
-  fill: #eee;
+	font-size: 0.5rem;
+	fill: #eee;
 }
 
 .react-calendar-heatmap {
-  top: 1rem;
-  right: 0.3rem;
-  position: relative;
+	top: 1rem;
+	right: 0.3rem;
+	position: relative;
+	cursor: default !important;
 }
-
-
 
 /* Time picker */

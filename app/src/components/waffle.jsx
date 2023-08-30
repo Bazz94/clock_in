@@ -16,9 +16,10 @@ const typeToCount = {
 	perfect: 2,
 	present: 3,
 	absent: 4,
+	current: 5,
 };
 
-function Waffle({ user }) {
+function Waffle({ user, tooltipOffset }) {
 	const [fromDate, setFromDate] = useState(null);
 	const [toDate, setToDate] = useState(null);
 	const [showTooltip, setShowTooltip] = useState(false);
@@ -89,8 +90,11 @@ function Waffle({ user }) {
 				)}
 				{showTooltip && (
 					<span
-						className={`absolute bg-white text-neutral-950 p-2 flex flex-col justify-center items-center rounded-lg animate-fadeOut`}
-						style={{ left: tooltipPosition.x - 50 + "px", top: tooltipPosition.y - 70 + "px" }}
+						className={`cursor-default text-md absolute bg-white text-neutral-950 p-2 flex flex-col justify-center items-center rounded-lg animate-fadeOut`}
+						style={{
+							left: tooltipPosition.x - 50 + tooltipOffset.x + "px",
+							top: tooltipPosition.y - 70 + tooltipOffset.y + "" + "px",
+						}}
 					>
 						<p className="">{tooltipText.date}</p>
 						<p className="">{tooltipText.count}</p>
@@ -120,10 +124,9 @@ export default Waffle;
 function getFromAndToDates() {
 	let to, from;
 	const date = new Date();
-	date.setDate(date.getDate() + date.getDay());
+	date.setDate(date.getDate() + (6 - date.getDay()));
 	to = date.toISOString().split("T")[0];
-	date.setDate(date.getDate() - 364 + date.getDay());
-
+	date.setDate(date.getDate() - 364 + (6 - date.getDay()));
 	from = date.toISOString().split("T")[0];
 	return { from: from, to: to };
 }
@@ -132,14 +135,13 @@ function getFromAndToDates() {
 function populateEmptyDays(currentDay, days) {
 	const currentDate = new Date(currentDay.date);
 	const strCurrentDate = getLocalDate(currentDate);
-	const newCurrentDay = { date: strCurrentDate, count: 1 };
 	const newData = [];
 	const date = new Date();
 	const today = new Date();
 	let index = 0;
-	date.setDate(date.getDate() + 1);
+	date.setDate(date.getDate() - 364);
 	for (let i = 0; i < 364; i++) {
-		date.setDate(date.getDate() - 1);
+		date.setDate(date.getDate() + 1);
 		const strDate = getLocalDate(date);
 		let day = { date: strDate, count: date > today ? 0 : 1 };
 		if (index < days.length) {
@@ -149,9 +151,12 @@ function populateEmptyDays(currentDay, days) {
 				index++;
 			}
 		}
+		if (strDate === strCurrentDate) {
+			day.count = 5;
+		}
 		newData.push(day);
 	}
-	newData.push(newCurrentDay);
+	console.log(newData);
 	return newData;
 }
 

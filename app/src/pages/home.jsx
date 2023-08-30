@@ -33,12 +33,11 @@ export default function Home() {
 	const [schedule, scheduleDispatch] = useScheduleReducer();
 
 	useEffect(() => {
-		console.log("token:", token.slice(0, 20));
-
 		if (!token) {
 			navigate("/login");
 			return () => {};
 		}
+		console.log("token:", token.slice(0, 20));
 		// Get user data
 		setIsLoading(true);
 		getUserFromDB(token, "user")
@@ -118,7 +117,7 @@ export default function Home() {
 						{user && <Timeline day={currentDay} />}
 					</div>
 					<div className="w-full m-2 border rounded-lg h-1/3 border-grey">
-						{user && <Waffle user={user} />}
+						{user && <Waffle user={user} tooltipOffset={{ x: 0, y: 0 }} />}
 					</div>
 				</section>
 			)}
@@ -140,7 +139,7 @@ export default function Home() {
 						</div>
 					)}
 					{user && user.team && (
-						<div className="flex justify-center flex-1 w-full py-2 my-2 space-y-5 rounded-xl bg-grey">
+						<div className="flex justify-center w-full h-full py-2 my-2 space-y-5 rounded-xl bg-grey">
 							<HasTeamUI setError={setError} user={user} userDispatch={userDispatch} />
 						</div>
 					)}

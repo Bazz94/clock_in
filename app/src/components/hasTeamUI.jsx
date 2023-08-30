@@ -28,10 +28,7 @@ const HasTeamUI = ({ setError, user, userDispatch }) => {
 		// Add event listeners and handlers here
 		socket.on("connect", () => {
 			console.log("Connected to server");
-
 			const teamId = team._id.toString();
-			console.log(teamId);
-
 			socket.on(teamId, (data) => {
 				if (data.from === user._id) return false;
 				console.log("Update received:", data);
@@ -202,10 +199,10 @@ const Accordion = ({ member, team }) => {
 			</div>
 			<div
 				className={`w-full  bg-black overflow-hidden transition-all duration-500 
-          ${isOpen ? " h-[250px] " : " h-0 "}`}
+          ${isOpen ? " h-[290px] " : " h-0 "}`}
 			>
-				<div className={`relative w-full h-[290px] -translate-y-6`}>
-					<Waffle user={member} />
+				<div className={`w-full h-[290px] `}>
+					<Waffle user={member} tooltipOffset={{ x: 0, y: 0 }} />
 				</div>
 			</div>
 		</div>

@@ -22,25 +22,24 @@ const statusToTitle = {
 const DashboardUI = ({ user, currentDay, currentDayDispatch, status, setStatus }) => {
 	const { time } = useContext(MyContext);
 	const [date, setDate] = useState(null);
-	// const [status, setStatus] = useState(calculateCurrentEvent(currentDay));
 	const [worked, setWorked] = useState(calculateWorked(currentDay));
 
 	useEffect(() => {
 		const now = new Date();
-		const options = { day: "2-digit", month: "long", year: "numeric" };
-		const formattedDate = now.toLocaleDateString("en-UK", options);
-		setDate(formattedDate);
-		const timeoutId = setTimeout(() => {
+		const secondsUntilNextMinute = 60 - now.getSeconds();
+		const initialTimeoutDelay = secondsUntilNextMinute * 1000;
+		const updateWorked = () => {
 			setWorked(calculateWorked(currentDay));
-			const intervalId = setInterval(() => {
-				const newWorked = calculateWorked(currentDay);
-				setWorked(newWorked);
-			}, 1000 * 60); // 1000 ms * 60 seconds = 1 minute
-			return () => clearInterval(intervalId);
-		}, (60 - now.getSeconds()) * 1000);
-
-		// Clear the timeout if the component unmounts
-		return () => clearTimeout(timeoutId);
+		};
+		const intervalId = setInterval(updateWorked, 1000 * 60); // Every minute
+		const timeoutId = setTimeout(() => {
+			updateWorked(); // Update worked initially
+			intervalId; // Trigger the first interval immediately
+		}, initialTimeoutDelay);
+		return () => {
+			//clearTimeout(timeoutId);
+			clearInterval(intervalId);
+		};
 	}, []);
 
 	function handleClockIn() {
@@ -64,12 +63,14 @@ const DashboardUI = ({ user, currentDay, currentDayDispatch, status, setStatus }
 			currentDayDispatch({
 				type: "set",
 				endedBreak: [...currentDay.endedBreak, date.toISOString()],
+				clockedIn: [...currentDay.clockedIn, date.toISOString()],
 			});
 		}
 		if (status === STATUS.working) {
 			currentDayDispatch({
 				type: "set",
 				startedBreak: [...currentDay.startedBreak, date.toISOString()],
+				clockedOut: [...currentDay.clockedOut, date.toISOString()],
 			});
 		}
 	}

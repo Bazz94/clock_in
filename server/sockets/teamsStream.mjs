@@ -27,7 +27,7 @@ async function setupChangeStream(io) {
 	changeStream.on("change", (change) => {
 		// Check if user has a team
 		if (change.fullDocument.team == null) return false;
-		console.log("Change occurred");
+		//console.log("Change occurred");
 		// emit signal
 		const teamId = change.fullDocument.team.toString();
 		io.emit(teamId, {

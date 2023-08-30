@@ -8,11 +8,11 @@ function connectSocket(server) {
 	});
 
 	io.on("connection", (socket) => {
-		console.log("A user connected");
+		//console.log("A user connected");
 
 		// You can add your event listeners and handlers here
 		socket.on("disconnect", () => {
-			console.log("User disconnected");
+			//console.log("User disconnected");
 		});
 	});
 
