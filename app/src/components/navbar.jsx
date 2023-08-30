@@ -18,43 +18,40 @@ function NavBar({ user, openSideDrawer, setOpenSideDrawer, currentTab, setCurren
     localStorage.setItem('tab', 'schedule');
   }
 
-  function clickLeave() {
-    setCurrentTab('leave');
-    localStorage.setItem('tab', 'leave');
+  function clickSocial() {
+    setCurrentTab('teams');
+    localStorage.setItem('tab', 'teams');
   }
 
   return (
-    <nav className='flex justify-center w-screen h-20 bg-black'>
-      <div className='flex flex-1 max-w-7xl'>
-        <button className='w-1/3 p-5 pl-12 text-xl text-left hover:scale-105 '
-          onClick={clickUsername}>
-          {user.name}
-        </button>
-        <div className='flex flex-row content-center justify-center w-1/3'>
-          <button className={`w-1/3 text-xl hover:scale-105
-            ${currentTab === 'home' ? selected : ''}`}
+    <nav className='flex justify-center h-20 bg-black min-w-[350px] max-w-7xl w-screen p-5'>
+        <div className='flex w-2/3'>
+        <button className='px-5 text-xl text-left border rounded-md group hover:bg-grey hover:bg-opacity-50 hover:text-green border-grey' 
+            onClick={clickUsername}>
+          <p className='group-hover:-translate-y-[2px]'>{user.name}</p>
+          </button>
+        </div>
+        <div className='flex justify-end w-2/3'>
+        <button className={`group px-3 mx-2 text-xl hover:text-green border
+            ${currentTab === 'home' ? selected : ' hover:bg-grey hover:bg-opacity-50 border-grey'}`}
             onClick={clickHome}>
-            Home
+          <p className={currentTab !== 'home' ? 'group-hover:-translate-y-[2px]' : ''}>Home</p>
           </button>
-          <button className={`w-1/3 text-xl hover:scale-105 
-            ${currentTab === 'schedule' ? selected : ''}`}
+        <button className={`group px-3 mx-2 text-xl hover:text-green border
+            ${currentTab === 'schedule' ? selected : ' hover:bg-grey hover:bg-opacity-50 border-grey'}`}
             onClick={clickSchedule}>
-            Schedule
+          <p className={currentTab !== 'schedule' ? 'group-hover:-translate-y-[2px]' : ''}>Schedule</p>
           </button>
-          <button className={`w-1/3 text-xl hover:scale-105 
-            ${currentTab === 'leave' ? selected : ''}`}
-            onClick={clickLeave}>
-            Leave
+        <button className={`group px-3 mx-2 text-xl hover:text-green border
+            ${currentTab === 'teams' ? selected : ' hover:bg-grey hover:bg-opacity-50 border-grey'}`}
+            onClick={clickSocial}>
+          <p className={currentTab !== 'teams' ? 'group-hover:-translate-y-[2px]' : ''}>Teams</p>
           </button>
         </div>
-        <div className='w-1/3'>
-          <Clock />
-        </div>
-      </div>
     </nav>
   )
 }
 
 export default NavBar;
 
-const selected = "underline text-orange-400";
+const selected = "text-green hover:text-green";

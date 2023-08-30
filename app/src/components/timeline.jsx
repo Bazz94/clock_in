@@ -1,260 +1,321 @@
-import { useContext, useRef, useState, useLayoutEffect } from "react";
-import { MyContext } from '../contexts/MyContextProvider.jsx';
-import { Stage, Layer, Line, Text, Circle, Group } from 'react-konva';
+import { useLayoutEffect, useContext, useState, useEffect, useMemo, useRef } from "react";
+import { Stage, Layer, Line, Text, Circle, Group, Rect, Arc } from "react-konva";
+import { MyContext } from "../contexts/MyContextProvider.jsx";
 
+// working, none, late
 
-const Timeline = ({day}) => {
-  const { time } = useContext(MyContext);
-  const parentRef = useRef(null);
-  const [dimensions, setDimensions] = useState({w: 0, h: 0});
+const Timeline = ({ day }) => {
+	const { time } = useContext(MyContext);
+	const parentRef = useRef(null);
+	const [dimensions, setDimensions] = useState({ w: 0, h: 0 });
+	const [margins, setMargins] = useState({ t: 0, l: 0, b: 0, r: 0, ym: 0, xm: 0 });
 
-  useLayoutEffect(() => {
-    if (parentRef) {
-      setDimensions({ w: parentRef.current.offsetWidth, h: parentRef.current.offsetHeight });
-    }
-  }, [parentRef, day]);
+	const xMargin = 0;
+	const yMargin = 30;
+	useLayoutEffect(() => {
+		if (parentRef.current) {
+			setDimensions({ w: parentRef.current.offsetWidth, h: parentRef.current.offsetHeight });
+			setMargins({
+				t: yMargin,
+				l: xMargin,
+				b: parentRef.current.offsetHeight - yMargin,
+				r: parentRef.current.offsetWidth - xMargin,
+				ym: parentRef.current.offsetHeight / 2,
+				xm: parentRef.current.offsetWidth / 2,
+			});
+		}
+	}, [day]);
 
-  return (
-    <div ref={parentRef} className="flex-1 hidden w-96 sm:block" style={{height: '100%'}}>
-      <Stage 
-        width={parentRef && dimensions.w} 
-        height={parentRef && dimensions.h}>
-        {dimensions.h !== 0 && <Layer>
-          <EmptyTimeLine dimensions={dimensions}/>
-          <Lines day={day} dimensions={dimensions} />
-          <CurrentTimeDot day={day} dimensions={dimensions} time={time} />
-        </Layer>}
-      </Stage>
-    </div>
-  )
-}
+	function updateDimensions() {
+		if (parentRef) {
+			setDimensions({ w: parentRef.current.offsetWidth, h: parentRef.current.offsetHeight });
+			setMargins({
+				t: yMargin,
+				l: xMargin,
+				b: parentRef.current.offsetHeight - yMargin,
+				r: parentRef.current.offsetWidth - xMargin,
+				ym: parentRef.current.offsetHeight / 2,
+				xm: parentRef.current.offsetWidth / 2,
+			});
+		}
+	}
+
+	useEffect(() => {
+		window.addEventListener("resize", updateDimensions);
+		return () => {
+			window.removeEventListener("resize", updateDimensions);
+		};
+	}, []);
+
+	return (
+		<div ref={parentRef} className="" style={{ height: "100%", width: "100%" }}>
+			<Stage width={parentRef.current && dimensions.w} height={parentRef.current && dimensions.h}>
+				{dimensions.h !== 0 && (
+					<Layer>
+						<Background margins={margins} />
+						<Grid margins={margins} xTickCount={12} />
+						<Legend margins={margins} />
+						{day.workStarts[0] && <Schedule day={day} margins={margins} />}
+						<Shapes margins={margins} day={day} />
+						<CurrentTimeDot margins={margins} time={time} />
+					</Layer>
+				)}
+			</Stage>
+		</div>
+	);
+};
 
 export default Timeline;
 
+const Background = ({ margins }) => {
+	const date = new Date();
+	const w = timeToXValue(date, margins);
+	return (
+		<Group>
+			<Rect
+				x={margins.l}
+				y={margins.t}
+				width={w - margins.l}
+				height={margins.b - margins.t}
+				fill={"#222222"}
+				opacity={0.5}
+			/>
+		</Group>
+	);
+};
 
+const Grid = ({ margins, xTickCount }) => {
+	const xTickInterval = (margins.r - margins.l) / xTickCount;
+	function calculateGrid() {
+		const lines = [];
+		for (let i = 0; i < xTickCount; i++) {
+			const line = {
+				x1: margins.l - xTickInterval / 2 + xTickInterval * (i + 1),
+				y1: margins.b,
+				x2: margins.l - xTickInterval / 2 + xTickInterval * (i + 1),
+				y2: margins.t,
+			};
+			lines.push(line);
+		}
+		return lines;
+	}
 
-const EmptyTimeLine = ({dimensions}) => {
-  const xMid = dimensions.w / 2;
-  const date = new Date();
-  const currentTimePoint = { x: xMid, y: timeToYValue(date, dimensions.h) };
-  return (
-    <Group>
-      <Line
-        x={0}
-        y={0}
-        points={[xMid, 0, xMid, dimensions.h]}
-        tension={0.5}
-        closed
-        stroke="#555"
-      />
-      <Line
-        x={0}
-        y={0}
-        points={[xMid, 0, xMid, currentTimePoint.y]}
-        tension={0.5}
-        closed
-        stroke="#eee"
-      />
-    </Group>
-  )
+	let lines = calculateGrid();
+
+	return (
+		<Group>
+			{lines.map((line, index) => (
+				<Group key={index}>
+					<Line
+						key={index}
+						x={0}
+						y={0}
+						points={[line.x1, line.y1, line.x2, line.y2]}
+						closed
+						stroke={"#555"}
+						strokeWidth={1}
+						opacity={0.2}
+					/>
+					<Text
+						key={index + 1}
+						x={line.x2 - 10}
+						y={line.y2 - 22}
+						align="center"
+						text={`${1 + index * 2}`}
+						fontSize={16}
+						fill={"#FFFFFF"}
+						width={20}
+					/>
+				</Group>
+			))}
+			<Line
+				x={0}
+				y={0}
+				points={[margins.l, margins.ym, margins.r, margins.ym]}
+				closed
+				stroke="#555"
+				strokeWidth={0.2}
+			/>
+		</Group>
+	);
+};
+
+const Legend = ({ margins }) => {
+	const items = [
+		{
+			text: "Schedule",
+			color: "#00ABFF",
+		},
+		{
+			text: "Working",
+			color: "#22FFBC",
+		},
+		{
+			text: "Late",
+			color: "#FF2265",
+		},
+	];
+	const y = margins.b + 22;
+	const xStart = (margins.r - margins.l) / items.length;
+	const xInterval = Math.max(xStart / 2, 80);
+	return (
+		<Group>
+			{items.map((item, index) => (
+				<Group key={index}>
+					<Text
+						x={xStart + index * xInterval}
+						y={y - 7}
+						text={item.text}
+						fontSize={16}
+						fill="#FFFFFF"
+						align="right"
+						width={item.text.length * 10}
+					/>
+					<Circle
+						x={xStart + index * xInterval + item.text.length * 10 + 10}
+						y={y}
+						radius={6}
+						fill={item.color}
+					/>
+				</Group>
+			))}
+		</Group>
+	);
+};
+
+const CurrentTimeDot = ({ margins, time }) => {
+	const date = new Date();
+	const x = timeToXValue(date, margins);
+	time;
+	return (
+		<Group>
+			<Line
+				x={0}
+				y={0}
+				points={[margins.l, margins.ym, x, margins.ym]}
+				closed
+				stroke="#eee"
+				strokeWidth={2}
+			/>
+			<Circle x={x} y={margins.ym} radius={4} fill={"#eee"} />
+		</Group>
+	);
+};
+
+const Shapes = ({ margins, day }) => {
+	const shapes = [];
+	for (let i = 0; i < day.clockedIn.length + 1; i++) {
+		shapes.push({
+			color: "#22FFBC",
+			rect: calculateRect(margins, day.clockedIn[i], day.clockedOut[i]),
+		});
+		shapes.push({
+			color: "#FF2265",
+			rect: calculateRect(margins, day.workStarts[i], day.clockedIn[i], day.workEnds[i]),
+		});
+	}
+	return (
+		<Group>
+			{shapes.map((shape, index) => (
+				<Rect
+					key={index}
+					x={shape.rect.x}
+					y={margins.ym}
+					width={shape.rect.w}
+					height={
+						shape.color === "#22FFBC" ? -(margins.b - margins.ym) / 2 : (margins.b - margins.ym) / 2
+					}
+					tension={0.4}
+					fill={shape.color}
+					opacity={0.8}
+				/>
+			))}
+		</Group>
+	);
+};
+
+// ClockIn, ClockOut
+// workStarts, ClockIn, workEnds
+function calculateRect(margins, start, end, workEnd) {
+	const startDate = start ? new Date(start) : null;
+	const endDate = end ? new Date(end) : null;
+	const workEndDate = workEnd ? new Date(workEnd) : null;
+	if (!startDate) {
+		return [];
+	}
+	const x = timeToXValue(startDate, margins);
+	// is Late rect
+	if (workEndDate) {
+		if (endDate && startDate >= endDate) {
+			return [];
+		}
+		const date = new Date();
+		if (date > workEndDate) {
+			const w = timeToXValue(workEndDate, margins) - x;
+			return {
+				x: x,
+				w: w,
+			};
+		}
+	}
+	if (!endDate) {
+		const date = new Date();
+		const w = timeToXValue(date, margins) - x;
+		return {
+			x: x,
+			w: w,
+		};
+	}
+	if (endDate) {
+		const w = timeToXValue(endDate, margins) - x;
+		return {
+			x: x,
+			w: w,
+		};
+	}
 }
 
-const CurrentTimeDot = ({day, dimensions, time}) => {
-  const xMid = dimensions.w / 2;
-  const date = new Date();
-  const currentTimePoint = { x: xMid, y: timeToYValue(date, dimensions.h) };
-  const xOffset = getXOffset(day);
-  return (
-    <Group>
-      <Circle x={currentTimePoint.x} y={currentTimePoint.y} radius={6} fill="#eee" />
-      <Text x={currentTimePoint.x - 70 - xOffset} y={currentTimePoint.y-6} text={time} fontSize={15} fill='#eee' align="right" width={50}/>
-    </Group>
-  )
+function timeToXValue(date, margins) {
+	let totalMinutes = date.getMinutes() + date.getHours() * 60;
+	const timeX = (totalMinutes / 1440) * (margins.r - margins.l);
+	return timeX + margins.l;
 }
 
-const Lines = ({ day, dimensions }) => {
-  let shapes = [];
-  for (let i = 0; i < day.clockedIn.length; i++) {
-
-    let clockLine = { color: 'green', lines: calculateLinesFromDates(
-      dimensions, day.clockedIn[i], day.clockedOut[i] )};
-    let lateLine = { color: 'red', lines: calculateLinesFromDates(
-      dimensions, day.workStarts[i], day.clockedIn[i], false, day.workEnds[i])};
-    let workLine = { color: 'blue', lines: calculateLinesFromDates(
-      dimensions, day.workStarts[i], day.workEnds[i], true)};
-    let breakLine = { color: 'yellow', lines: calculateLinesFromDates(
-      dimensions, day.startedBreak[i], day.endedBreak[i])};
-    shapes = [ ...shapes ,lateLine, workLine, clockLine, breakLine];
-  }
-
-  return (
-    <Group>
-      {shapes.map((shape, index) => (
-        <Group key={index}>
-          {shape.lines.map((line, index2) => (
-            <Group key={index2}>
-              <Line
-                key={index.toString + index2}
-                x={0}
-                y={0}
-                points={[line.points[0].x, line.points[0].y, line.points[1].x, line.points[1].y]}
-                tension={0.5}
-                closed
-                stroke={shape.color}
-              />
-              {line.type !== 'line' &&
-                <Text key={index2}
-                  x={line.points[0].x - (shape.color === 'blue' ? -30 : 140)} y={line.points[0].y - 6}
-                  align={shape.color === 'blue' ? 'left' : 'right'}
-                  text={getMarkerText(day ,line.type, shape.color)} fontSize={15} fill={shape.color}
-                  width={130}
-                />
-              }
-            </Group>
-          ))}
-        </Group>
-      ))}
-    </Group>
-  )
-}
-
-
-function calculateLinesFromDates(dimensions, start, end, isWork, isLateLine) {
-  const startDate = start ? new Date(start) : null; 
-  const endDate = end ? new Date(end) : null; 
-  if (!start) {
-    return [];
-  }
-  const xMid = dimensions.w / 2;
-  const startPoint = { x: xMid, y: timeToYValue(startDate, dimensions.h) }
-  if (isLateLine) {
-    if (end && start >= end) {
-      return [];
-    }
-    const date = new Date();
-    if (date > isLateLine) {
-      const isLateLineDate = new Date(isLateLine);
-      const line = {
-        type: 'line', points: [{ x: xMid, y: startPoint.y }, { x: xMid, y: timeToYValue(isLateLineDate, dimensions.h) }]
-      };
-    return [line];
-    }
-  }
-  let startMarker = { type: 'start', points: [{ x: xMid - 10, y: startPoint.y }, { x: xMid + 10, y: startPoint.y }] };
-  if (!end) {
-    const date = new Date();
-    const currentTimePoint = { x: xMid, y: timeToYValue(date, dimensions.h) };
-    let line = {
-      type: 'line', points: [{ x: xMid, y: startPoint.y }, { x: xMid, y: currentTimePoint.y }]
-    };
-    if (date < startDate) {
-      return [];
-    }
-    return [startMarker, line];
-  }
-  const endPoint = { x: xMid, y: timeToYValue(endDate, dimensions.h) }
-  let endMarker = {
-    type: 'end', points: [{ x: xMid - 10, y: endPoint.y }, { x: xMid + 10, y: endPoint.y }]
-  };
-  if (isWork) {
-    return [startMarker, endMarker];
-  }
-  const line = {
-    type: 'line', points: [{ x: xMid, y: startPoint.y }, { x: xMid, y: endPoint.y }]
-  };
-  if (isLateLine) {
-    return [line];
-  }
-  return [startMarker, line, endMarker];
-}
-
-
-function timeToYValue(date, canvasHeight) {
-  let totalMinutes = date.getMinutes() + (date.getHours() * 60);
-  const timeY = (totalMinutes / 1440) * (canvasHeight - 12);
-  return timeY + 6;
-}
-
-
-function getMarkerText(day, markerType, color) {
-
-  const options = ['en-Gb', { hour: '2-digit', minute: '2-digit', hour12: false }];
-  // clock-in and out
-  if (color === 'green') {
-    if (markerType === 'start') {
-      const date = new Date(day.clockedIn[0]);
-      return date.toLocaleTimeString(...options);
-    }
-    if (markerType === 'end') {
-      const date = new Date(day.clockedOut[0]);
-      return date.toLocaleTimeString(...options);
-    }
-  }
-  // break start and stop
-  if (color === 'yellow') {
-    if (markerType === 'start') {
-      const date = new Date(day.startedBreak[0]);
-      return date.toLocaleTimeString(...options);
-    }
-    if (markerType === 'end') {
-      const date = new Date(day.endedBreak[0]);
-      return date.toLocaleTimeString(...options);
-    }
-  }
-  // work starts and ends
-  if (color === 'blue') {
-    if (markerType === 'start') {
-      const date = new Date(day.workStarts[0]);
-      return date.toLocaleTimeString(...options);
-    }
-    if (markerType === 'end') {
-      const date = new Date(day.workEnds[0]);
-      return date.toLocaleTimeString(...options);
-    }
-  }
-}
-
-
-function getXOffset(day) {
-  let canGoToRight = true;
-  let date = new Date();
-  let before= new Date();
-  let after = new Date();
-  before.setMinutes(date.getMinutes() - 20);
-  after.setMinutes(date.getMinutes() + 20);
-  date = date.toISOString();
-  before = before.toISOString();
-  after = after.toISOString()
-
-  if (day.workStarts[0]) {
-    if (day.workStarts[0] < after && day.workStarts[0] > before) {
-      canGoToRight = false;
-    }
-  }
-  if (day.workEnds[0]) {
-    if (day.workEnds[0] < after && day.workEnds[0] > before) {
-      canGoToRight = false;
-    }
-  }
-  if (day.clockedIn[0]) {
-    if (day.clockedIn[0] < after && day.clockedIn[0] > before) {
-      return canGoToRight ? -80 : 45;
-    }
-  }
-  if (day.clockedOut[0]) {
-    if (day.clockedOut[0] < after && day.clockedOut[0] > before) {
-      return canGoToRight ? -80 : 45;
-    }
-  }
-  if (day.startedBreak[0]) {
-    if (day.startedBreak[0] < after && day.startedBreak[0] > before) {
-      return canGoToRight ? -80 : 45;
-    }
-  }
-  if (day.endedBreak[0]) {
-    if (day.endedBreak[0] < after && day.endedBreak[0] > before) {
-      return canGoToRight ? -80 : 45;
-    }
-  }
-  return 0;
-}
+const Schedule = ({ day, margins }) => {
+	const workStartsX = timeToXValue(new Date(day.workStarts[0]), margins);
+	const workEndsX = timeToXValue(new Date(day.workEnds[0]), margins);
+	return (
+		<Group>
+			<Line
+				x={0}
+				y={0}
+				points={[workStartsX, margins.t, workStartsX, margins.b]}
+				stroke={"#00ABFF"}
+				strokeWidth={1}
+			/>
+			<Text
+				x={workStartsX + 3}
+				y={margins.t + 2}
+				text={"Start"}
+				fontSize={16}
+				fill="#00ABFF"
+				width={50}
+			/>
+			<Line
+				x={0}
+				y={0}
+				points={[workEndsX, margins.t, workEndsX, margins.b]}
+				stroke={"#00ABFF"}
+				strokeWidth={1}
+			/>
+			<Text
+				x={workEndsX + 3}
+				y={margins.t + 2}
+				text={"Finish"}
+				fontSize={16}
+				fill="#00ABFF"
+				width={50}
+			/>
+		</Group>
+	);
+};
